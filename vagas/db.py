@@ -44,11 +44,11 @@ def salvar_vagas(conn, vagas: list[dict]) -> int:
             """
             insert into silver.vagas (
                 id, fonte, id_externo, titulo, empresa, descricao, url, localizacao,
-                modelo_trabalho, nivel, tecnologias, cita_laravel, chave_dedupe, publicada_em
+                modelo_trabalho, nivel, tecnologias, cita_laravel, chave_dedupe, publicada_em, so_titulo
             ) values (
                 %(id)s, %(fonte)s, %(id_externo)s, %(titulo)s, %(empresa)s, %(descricao)s,
                 %(url)s, %(localizacao)s, %(modelo_trabalho)s, %(nivel)s, %(tecnologias)s,
-                %(cita_laravel)s, %(chave_dedupe)s, %(publicada_em)s
+                %(cita_laravel)s, %(chave_dedupe)s, %(publicada_em)s, %(so_titulo)s
             )
             on conflict (id) do update set
                 titulo = excluded.titulo, empresa = excluded.empresa,
@@ -56,7 +56,8 @@ def salvar_vagas(conn, vagas: list[dict]) -> int:
                 localizacao = excluded.localizacao, modelo_trabalho = excluded.modelo_trabalho,
                 nivel = excluded.nivel, tecnologias = excluded.tecnologias,
                 cita_laravel = excluded.cita_laravel, chave_dedupe = excluded.chave_dedupe,
-                publicada_em = excluded.publicada_em, ultima_coleta = now()
+                publicada_em = excluded.publicada_em, so_titulo = excluded.so_titulo,
+                ultima_coleta = now()
             returning (xmax = 0) as inserida
             """,
             v,

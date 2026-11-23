@@ -7,7 +7,7 @@ currículo** a cada vaga. Tudo roda localmente, sem custo de API. Próxima etapa
 ## Arquitetura
 
 ```
-fontes (GitHub, Adzuna)
+fontes (GitHub, Adzuna, alertas no Gmail)
    │  coleta/            requisições às APIs oficiais
    ▼
 bronze  dados/bronze/<fonte>/<data>/*.json     resposta bruta, sem alteração
@@ -15,7 +15,7 @@ bronze  dados/bronze/<fonte>/<data>/*.json     resposta bruta, sem alteração
    ▼
 silver  silver.vagas, silver.vaga_status, silver.execucoes   (PostgreSQL)
    ▼
-gold    gold.vagas (sem duplicadas, com nota) · gold.vagas_alvo (Laravel júnior/pleno)
+gold    gold.vagas (sem duplicadas, com nota) · gold.vagas_alvo (Laravel júnior/pleno + PHP dos e-mails)
    ▼
 painel/ Streamlit ──► sugestões para o currículo (cruzando a vaga com curriculo/base/curriculo.yaml)
 ```
@@ -63,6 +63,46 @@ para colar no assistente de IA que você já usa. O projeto não chama nenhuma A
 |---|---|---|
 | GitHub | Issues abertas de `backend-br/vagas` e `phpdevbr/vagas` | Não (token opcional) |
 | Adzuna | API que agrega vagas de vários sites do Brasil | Sim, gratuita: https://developer.adzuna.com/ |
+| Gmail | Alertas de vaga que chegam no seu e-mail (LinkedIn, Indeed, Gupy...) | Autorização do Google, gratuita (abaixo) |
+
+### Gmail: configuração (uma vez só)
+
+O projeto lê os e-mails pela API oficial do Gmail com permissão **somente de leitura**
+(`gmail.readonly`): não consegue apagar, enviar nem alterar nada. Sua senha nunca passa pelo projeto.
+
+1. Acesse https://console.cloud.google.com/ e crie um projeto (ex.: `vagas-laravel`).
+2. Em **APIs e serviços → Biblioteca**, procure **Gmail API** e clique em **Ativar**.
+3. Em **Google Auth Platform** (tela de permissão OAuth), clique em **Começar**: dê um nome ao app,
+   escolha seu e-mail como suporte, público **Externo**, e conclua.
+4. Em **Público**, adicione o seu próprio Gmail em **Usuários de teste**.
+5. Em **Clientes → Criar cliente**, escolha o tipo **App para computador** e crie. Clique em
+   **Baixar JSON** e salve o arquivo como `credenciais/gmail_cliente.json` dentro desta pasta.
+6. Rode a autorização. O navegador abre; o Google vai avisar que o app não foi verificado
+   (é o seu próprio app): clique em **Continuar** e permita a leitura dos e-mails.
+
+```bash
+.venv\Scripts\python -m vagas.coleta.gmail --autorizar
+```
+
+> Com o app em modo **Teste**, o Google expira a autorização a cada 7 dias e você precisa rodar o
+> `--autorizar` de novo. Para não expirar, em **Público** clique em **Publicar app** (fica "Em produção"
+> sem precisar de verificação para uso pessoal; o aviso de "app não verificado" continua aparecendo
+> só na hora de autorizar).
+
+Depois de autorizado:
+
+```bash
+.venv\Scripts\python -m vagas.coleta.gmail --descobrir   # quem te manda e-mails de vaga e quantas vagas foram lidas
+.venv\Scripts\python -m vagas.coleta.gmail --testar      # mostra as vagas extraídas, sem gravar
+```
+
+Os alertas por e-mail trazem só título, empresa e local, sem a descrição. Por isso essas vagas entram
+no filtro principal quando citam Laravel **ou PHP** no título, e o painel avisa para confirmar Laravel
+abrindo a vaga (`so_titulo` na silver).
+
+A busca padrão pega e-mails dos últimos 7 dias que falam de vaga e de Laravel ou PHP. Dá para trocar
+com `GMAIL_DIAS` e `GMAIL_CONSULTA` no `.env` (mesma sintaxe da caixa de pesquisa do Gmail).
+O arquivo do cliente e o token ficam em `credenciais/`, fora do Git.
 
 ## Como rodar
 
@@ -101,7 +141,7 @@ vagas/
 ├── config.py            lê o .env
 ├── db.py                conexão e gravação no Postgres
 ├── pipeline.py          orquestra coleta → bronze → silver
-├── coleta/              um módulo por fonte
+├── coleta/              um módulo por fonte (emails.py extrai vagas do HTML dos alertas)
 ├── tratamento/          regras de padronização
 ├── pontuacao/nota.py    nota de compatibilidade
 ├── curriculo/           leitura do currículo base e sugestões por vaga

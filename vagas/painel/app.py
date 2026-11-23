@@ -92,7 +92,8 @@ def mudar_status(vaga_id: str, status: str | None) -> None:
 with st.sidebar:
     st.header("Filtros")
     so_alvo = st.toggle("Só Laravel júnior/pleno", value=True,
-                        help="Desligue para ver todas as vagas coletadas, de qualquer stack e nível.")
+                        help="Vagas que citam Laravel, mais as de PHP vindas de alertas por e-mail "
+                             "(que só trazem o título). Desligue para ver todas as vagas coletadas.")
     dias = st.selectbox("Publicadas nos últimos", [7, 30, 90, 365, None], index=2,
                         format_func=lambda d: "Qualquer data" if d is None else f"{d} dias")
     status_sel = st.multiselect("Status", list(STATUS), default=["nova", "interessa"],
@@ -173,6 +174,9 @@ for _, v in f.iterrows():
             )
             if len(v["tecnologias"]):
                 st.markdown(" ".join(f"`{t}`" for t in v["tecnologias"]))
+            if v.get("so_titulo") and not v["cita_laravel"]:
+                st.caption("📧 Veio de um alerta por e-mail, só com o título. "
+                           "Abra a vaga e confirme se pede Laravel.")
         with acoes:
             b1, b2 = st.columns(2)
             b1.button("⭐", key=f"i-{v['id']}", help="Interessa", on_click=mudar_status, args=(v["id"], "interessa"),

@@ -9,7 +9,7 @@ import logging
 import sys
 
 from vagas import db
-from vagas.coleta import adzuna, github
+from vagas.coleta import adzuna, github, gmail
 from vagas.coleta.base import FonteIgnorada
 from vagas.curriculo.base import CurriculoNaoEncontrado
 from vagas.curriculo.base import carregar as carregar_curriculo
@@ -18,6 +18,7 @@ from vagas.pontuacao import nota
 COLETORES = {
     github.FONTE: github.coletar,
     adzuna.FONTE: adzuna.coletar,
+    gmail.FONTE: gmail.coletar,
 }
 
 log = logging.getLogger("pipeline")

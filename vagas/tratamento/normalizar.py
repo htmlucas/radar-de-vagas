@@ -122,6 +122,7 @@ def montar_vaga(
     publicada_em: datetime | str | None = None,
     rotulos: list[str] | None = None,
     tecnologias_confirmadas: list[str] | None = None,
+    so_titulo: bool = False,
 ) -> dict:
     """Monta o dicionário no formato da tabela silver.vagas.
 
@@ -150,4 +151,5 @@ def montar_vaga(
         "cita_laravel": "Laravel" in tecnologias,
         "chave_dedupe": chave_dedupe(titulo, empresa),
         "publicada_em": publicada_em,
+        "so_titulo": so_titulo,
     }

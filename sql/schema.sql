@@ -37,6 +37,10 @@ create table if not exists silver.vagas (
     ultima_coleta   timestamptz not null default now()
 );
 
+-- Vagas que vieram só com título/empresa/local (alertas de e-mail): sem descrição,
+-- não dá para confirmar Laravel. Coluna adicionada depois da criação da tabela.
+alter table silver.vagas add column if not exists so_titulo boolean not null default false;
+
 create index if not exists vagas_publicada_idx on silver.vagas (publicada_em desc);
 create index if not exists vagas_dedupe_idx    on silver.vagas (chave_dedupe);
 
@@ -59,10 +63,14 @@ create table if not exists silver.vaga_pontuacao (
 -- Removida: a geração de currículo com IA foi trocada por sugestões locais em texto.
 drop table if exists silver.curriculos_gerados;
 
+-- As visões gold são recriadas a cada execução: assim acompanham colunas novas da silver
+-- (o "create or replace view" do Postgres não aceita mudar a ordem das colunas).
+drop view if exists gold.vagas_alvo;
+drop view if exists gold.vagas;
+
 -- Gold: uma linha por vaga real (remove a mesma vaga vinda de fontes diferentes),
 -- já com o status do usuário e a nota de compatibilidade.
--- (Colunas novas sempre no FIM: o Postgres só deixa "create or replace view" acrescentar.)
-create or replace view gold.vagas as
+create view gold.vagas as
 select distinct on (v.chave_dedupe)
        v.*,
        coalesce(s.status, 'nova') as status,
@@ -72,12 +80,17 @@ select distinct on (v.chave_dedupe)
   from silver.vagas v
   left join silver.vaga_status s on s.vaga_id = v.id
   left join silver.vaga_pontuacao p on p.vaga_id = v.id
- order by v.chave_dedupe, v.publicada_em desc nulls last;
+ -- Entre as cópias da mesma vaga, fica a que confirma Laravel e tem mais texto
+ -- (ex.: a da Adzuna, que tem descrição, em vez da do e-mail, que só tem o título).
+ order by v.chave_dedupe, v.cita_laravel desc, length(coalesce(v.descricao, '')) desc,
+          v.publicada_em desc nulls last;
 
--- Gold: o alvo do projeto. Laravel, nível júnior/pleno ou não informado, não descartada.
-create or replace view gold.vagas_alvo as
+-- Gold: o alvo do projeto. Nível júnior/pleno ou não informado, não descartada, e:
+--   - Laravel confirmado, ou
+--   - PHP numa vaga que só tem título (alerta de e-mail): provável Laravel, a confirmar.
+create view gold.vagas_alvo as
 select *
   from gold.vagas
- where cita_laravel
+ where (cita_laravel or (so_titulo and 'PHP' = any(tecnologias)))
    and coalesce(nivel, 'pleno') in ('junior', 'pleno')
    and status <> 'descartada';

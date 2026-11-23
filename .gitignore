@@ -11,3 +11,6 @@ curriculo/base/
 
 # Configuração local do Claude Code
 .claude/
+
+# Credenciais do Google (OAuth) e token do Gmail
+credenciais/

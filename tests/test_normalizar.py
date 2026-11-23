@@ -74,6 +74,7 @@ def test_montar_vaga():
         descricao="Laravel, MySQL e Docker",
     )
     assert v["id"] == "github:42"
+    assert v["so_titulo"] is False  # padrão: fontes com descrição
     assert v["cita_laravel"] is True
     assert v["nivel"] == "pleno"
     assert v["modelo_trabalho"] == "remoto"
