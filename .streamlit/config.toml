@@ -1,0 +1,28 @@
+# Identidade visual do Radar de Vagas (tema claro, índigo, Inter).
+# Cores de gráfico: paleta validada para daltonismo (ver vagas/painel/graficos.py).
+
+[theme]
+base = "light"
+primaryColor = "#4f46e5"
+backgroundColor = "#f6f7fb"
+secondaryBackgroundColor = "#eef0f6"
+textColor = "#111827"
+linkColor = "#4338ca"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFontWeights = 650
+baseRadius = "0.6rem"
+buttonRadius = "0.5rem"
+borderColor = "#e5e7eb"
+showWidgetBorder = true
+showSidebarBorder = true
+chartCategoricalColors = ["#4f46e5", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#2a78d6", "#e34948"]
+
+[theme.sidebar]
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f3f4f6"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false

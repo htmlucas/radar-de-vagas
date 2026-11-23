@@ -52,6 +52,32 @@ create table if not exists silver.vaga_status (
     atualizado_em timestamptz not null default now()
 );
 
+-- Andamento da candidatura além de "candidatei" (constraint recriada para aceitar os novos valores).
+alter table silver.vaga_status drop constraint if exists vaga_status_status_check;
+alter table silver.vaga_status add constraint vaga_status_status_check
+    check (status in ('interessa', 'descartada', 'candidatei', 'entrevista', 'proposta', 'recusado'));
+
+-- Por que a vaga foi descartada (motivo de uma lista fixa + detalhe livre).
+alter table silver.vaga_status add column if not exists motivo_descarte text;
+alter table silver.vaga_status add column if not exists detalhe_descarte text;
+
+-- Histórico de cada mudança de status, com data: base dos relatórios
+-- (funil, tempo até candidatar, tempo sem retorno). 'nova' = voltou a não ter status.
+create table if not exists silver.vaga_status_historico (
+    id      bigserial primary key,
+    vaga_id text not null references silver.vagas (id) on delete cascade,
+    status  text not null,
+    em      timestamptz not null default now()
+);
+create index if not exists status_hist_vaga_idx on silver.vaga_status_historico (vaga_id, em);
+alter table silver.vaga_status_historico add column if not exists motivo text;
+
+-- Status marcados antes do histórico existir entram com a data da última mudança.
+insert into silver.vaga_status_historico (vaga_id, status, em)
+select s.vaga_id, s.status, s.atualizado_em
+  from silver.vaga_status s
+ where not exists (select 1 from silver.vaga_status_historico h where h.vaga_id = s.vaga_id);
+
 -- Nota de compatibilidade com o seu perfil (recalculada a cada coleta).
 create table if not exists silver.vaga_pontuacao (
     vaga_id         text primary key references silver.vagas (id) on delete cascade,
@@ -76,7 +102,14 @@ select distinct on (v.chave_dedupe)
        coalesce(s.status, 'nova') as status,
        s.nota,
        p.compatibilidade,
-       p.motivos
+       p.motivos,
+       s.atualizado_em as status_em,
+       -- O alvo do projeto: júnior/pleno (ou nível não informado) e
+       -- Laravel confirmado, ou PHP numa vaga que só tem título (alerta de e-mail).
+       ((v.cita_laravel or (v.so_titulo and 'PHP' = any(v.tecnologias)))
+        and coalesce(v.nivel, 'pleno') in ('junior', 'pleno')) as alvo,
+       s.motivo_descarte,
+       s.detalhe_descarte
   from silver.vagas v
   left join silver.vaga_status s on s.vaga_id = v.id
   left join silver.vaga_pontuacao p on p.vaga_id = v.id
@@ -85,12 +118,9 @@ select distinct on (v.chave_dedupe)
  order by v.chave_dedupe, v.cita_laravel desc, length(coalesce(v.descricao, '')) desc,
           v.publicada_em desc nulls last;
 
--- Gold: o alvo do projeto. Nível júnior/pleno ou não informado, não descartada, e:
---   - Laravel confirmado, ou
---   - PHP numa vaga que só tem título (alerta de e-mail): provável Laravel, a confirmar.
+-- Gold: as vagas do alvo que você não descartou.
 create view gold.vagas_alvo as
 select *
   from gold.vagas
- where (cita_laravel or (so_titulo and 'PHP' = any(tecnologias)))
-   and coalesce(nivel, 'pleno') in ('junior', 'pleno')
+ where alvo
    and status <> 'descartada';

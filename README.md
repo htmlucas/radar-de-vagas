@@ -39,6 +39,42 @@ Regra determinística em `vagas/pontuacao/nota.py`, recalculada a cada coleta pa
 
 O perfil (o que você domina, conhece e as cidades viáveis) fica na seção `pontuacao` do currículo base.
 
+## Painel
+
+Interface no estilo de um SaaS: tema claro, índigo, fonte Inter, ícones Lucide (SVGs oficiais do pacote
+`lucide-static`, licença ISC, em `vagas/painel/icones/`) e gráficos com paleta validada para daltonismo.
+
+| Página | Para que serve |
+|---|---|
+| Visão geral | Indicadores (vagas, no perfil, novas na semana, candidaturas, acompanhamento), evolução semanal, melhores oportunidades, o que precisa de ação e resumo do mercado |
+| Vagas | Busca, filtros rápidos (modalidade, status, só meu perfil) e avançados (nível, tecnologia, fonte, período), ordenação, cards com nota explicável e ações; detalhes em janela sem sair da lista |
+| Candidaturas | Tabela editável (status, observação, próxima ação, dias sem retorno) e kanban com as etapas existentes |
+| Sugestões de currículo | Vaga e requisitos à esquerda; resumo, experiência, projetos, tecnologias e lacunas à direita, cada trecho com botão de copiar |
+| Relatórios | Candidaturas, Descartadas, Mercado, Stack, Empresas e Fontes |
+| Configurações | Coleta, estado de cada fonte, camadas Bronze/Silver/Gold, histórico de execuções e integrações (sem expor chaves) |
+
+Tema em `.streamlit/config.toml`; componentes visuais em `vagas/painel/ui.py`; gráficos em `vagas/painel/graficos.py`;
+regras de apresentação testadas em `vagas/painel/logica.py`.
+
+## Relatórios
+
+Página **📊 Relatórios** do painel (menu lateral), tudo na tela. Filtros no topo: período, vagas
+(alvo ou todas), fontes e modelo de trabalho.
+
+| Aba | O que responde |
+|---|---|
+| 📨 Minhas candidaturas | Candidaturas, taxa de resposta, entrevistas, propostas, dias até se candidatar; funil; candidaturas por semana; **tabela editável das empresas em que você se candidatou** (andamento e observação); **quem cobrar** (sem retorno há 7+ dias); vagas paradas em "interessa"; boas vagas recentes que você ainda não marcou |
+| 🗑️ Descartadas | Por que você descarta (gráfico dos motivos) com dica para o motivo mais comum; tabela das descartadas para corrigir motivo/detalhe ou **restaurar** a vaga |
+| 📈 Mercado | Vagas por semana e fonte, % remotas, nível, modelo de trabalho, dia da semana em que as vagas saem, onde estão as híbridas/presenciais |
+| 🧩 Stack e lacunas | O que as vagas pedem, colorido por "você domina / conhece / não tem"; **o que estudar**; distribuição das notas |
+| 🏢 Empresas | Quem mais anuncia, nota média e sua situação em cada empresa |
+| 📡 Fontes | Qual fonte traz vagas do alvo (e qual é ruído) e a saúde das coletas |
+
+Na página **Vagas**, depois de se candidatar, atualize o **Andamento** (entrevista, proposta, recusado)
+e use a **Observação**. Ao descartar (🗑️), uma janela pede o **motivo** (lista fixa, para dar para contar)
+e um detalhe opcional. A lista mostra 25 vagas por vez, com "Mostrar mais". Cada mudança fica em `silver.vaga_status_historico`, com data, e é isso que
+alimenta o funil, a taxa de resposta e os lembretes.
+
 ## Sugestões para o currículo
 
 Seu currículo fica em `curriculo/base/curriculo.yaml` (modelo em `curriculo/exemplo.yaml`).
@@ -122,6 +158,21 @@ Coletar vagas:
 .venv\Scripts\python -m vagas.pipeline
 ```
 
+### Coleta automática (Windows)
+
+Uma tarefa no Agendador de Tarefas roda a coleta **todo dia às 8h**. Se o PC estiver desligado nesse
+horário, ela roda assim que ele ligar. O script abre o Docker Desktop se estiver fechado, garante o banco
+no ar, roda o pipeline e grava o log em `dados/logs/coleta-AAAA-MM-DD.log` (logs com mais de 30 dias são
+apagados). A página **Configurações** mostra o horário, a próxima execução e o resultado da última.
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts\agendar.ps1 -Horario 08:00   # criar/alterar
+powershell -ExecutionPolicy Bypass -File scripts\coletar.ps1                  # rodar agora, à mão
+```
+
+Para remover: `Unregister-ScheduledTask -TaskPath "\RadarDeVagas\" -TaskName "ColetaDiaria"`.
+A tarefa roda com o seu usuário e só quando você está logado no Windows.
+
 Abrir o painel (http://localhost:8501):
 
 ```bash
@@ -145,7 +196,15 @@ vagas/
 ├── tratamento/          regras de padronização
 ├── pontuacao/nota.py    nota de compatibilidade
 ├── curriculo/           leitura do currículo base e sugestões por vaga
-└── painel/app.py        painel Streamlit
+├── relatorios.py        cálculos dos relatórios (funções puras, testadas)
+└── painel/              Streamlit
+    ├── app.py           navegação, tema e barra lateral
+    ├── paginas/         visao_geral, vagas, candidaturas, sugestoes, relatorios, configuracoes
+    ├── ui.py            identidade visual, ícones e componentes (cartões, selos, estados vazios)
+    ├── graficos.py      gráficos Altair padronizados
+    ├── acoes.py         ações de status e janelas (detalhes, descarte)
+    ├── logica.py        regras de apresentação (filtros, classificação da nota, próxima ação)
+    └── comum.py         carregamento de dados e estado do pipeline
 curriculo/exemplo.yaml   modelo do currículo base
 sql/schema.sql           esquemas silver e gold (idempotente)
 tests/                   testes das regras de tratamento, nota e sugestões
