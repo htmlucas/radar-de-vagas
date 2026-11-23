@@ -1,0 +1,14 @@
+# Ambiente
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Segredos e dados pessoais
+.env
+dados/
+curriculo/base/
+curriculo/gerados/
+
+# Configuração local do Claude Code
+.claude/
