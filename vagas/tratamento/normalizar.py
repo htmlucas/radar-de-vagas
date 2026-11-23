@@ -108,11 +108,20 @@ def montar_vaga(
     localizacao: str | None = None,
     publicada_em: datetime | str | None = None,
     rotulos: list[str] | None = None,
+    tecnologias_confirmadas: list[str] | None = None,
 ) -> dict:
-    """Monta o dicionário no formato da tabela silver.vagas."""
+    """Monta o dicionário no formato da tabela silver.vagas.
+
+    `tecnologias_confirmadas`: tecnologias que a própria fonte garantiu, mesmo que
+    não apareçam no texto que recebemos (ex.: a Adzuna busca "laravel" no texto
+    completo, mas a API só devolve um trecho da descrição).
+    """
     titulo = (titulo or "").strip()
     empresa = (empresa or "").strip() or None
     tecnologias = detectar_tecnologias(titulo, descricao, " ".join(rotulos or []))
+    for tec in tecnologias_confirmadas or []:
+        if tec not in tecnologias:
+            tecnologias.append(tec)
     return {
         "id": f"{fonte}:{id_externo}",
         "fonte": fonte,

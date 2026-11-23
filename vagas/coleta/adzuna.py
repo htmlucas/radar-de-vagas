@@ -10,7 +10,8 @@ from vagas.tratamento.normalizar import montar_vaga
 
 FONTE = "adzuna"
 URL = "https://api.adzuna.com/v1/api/jobs/br/search/{pagina}"
-BUSCAS = ["laravel"]
+# termo buscado -> tecnologia que a busca garante (a Adzuna procura no texto completo)
+BUSCAS = {"laravel": "Laravel"}
 MAX_PAGINAS = 4
 POR_PAGINA = 50
 DIAS = 14
@@ -22,7 +23,7 @@ def coletar() -> tuple[list[dict], list[str]]:
 
     sessao = sessao_http()
     brutos, vagas = {}, []
-    for termo in BUSCAS:
+    for termo, tecnologia in BUSCAS.items():
         resultados = []
         for pagina in range(1, MAX_PAGINAS + 1):
             resp = sessao.get(
@@ -54,6 +55,7 @@ def coletar() -> tuple[list[dict], list[str]]:
                     descricao=r.get("description"),
                     localizacao=(r.get("location") or {}).get("display_name"),
                     publicada_em=r.get("created"),
+                    tecnologias_confirmadas=[tecnologia],
                 )
             )
     return vagas, [str(salvar_bronze(FONTE, brutos))]

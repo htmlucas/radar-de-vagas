@@ -51,6 +51,19 @@ def test_mesma_vaga_em_fontes_diferentes_tem_mesma_chave():
     assert a == b
 
 
+def test_tecnologia_confirmada_pela_fonte_conta_mesmo_fora_do_trecho():
+    v = montar_vaga(
+        fonte="adzuna",
+        id_externo="1",
+        titulo="Desenvolvedor PHP - Recrutamento Aberto",
+        url="https://exemplo/1",
+        descricao="Desenvolvimento e manutenção de software em PHP...",
+        tecnologias_confirmadas=["Laravel"],
+    )
+    assert v["cita_laravel"] is True
+    assert v["tecnologias"].count("Laravel") == 1
+
+
 def test_montar_vaga():
     v = montar_vaga(
         fonte="github",
