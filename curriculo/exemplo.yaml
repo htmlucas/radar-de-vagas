@@ -1,0 +1,49 @@
+# Modelo do currículo base. Copie para curriculo/base/curriculo.yaml e preencha
+# com os seus dados (a pasta curriculo/base/ fica fora do Git).
+# É a ÚNICA fonte de verdade da geração: o Claude só reorganiza e reescreve o que está aqui.
+
+contato:
+  nome: Nome Sobrenome
+  titulo: Desenvolvedor Backend PHP/Laravel
+  cidade: Cidade – UF
+  disponibilidade: Disponível para trabalho remoto
+  email: voce@exemplo.com
+  telefone: ""
+  linkedin: ""
+  github: github.com/seu-usuario
+
+resumo: >-
+  Desenvolvedor com experiência em PHP e Laravel, APIs REST, filas e PostgreSQL.
+
+experiencias:            # da mais recente para a mais antiga; o id é usado internamente
+  - id: empresa-a
+    empresa: Empresa A
+    cargo: Desenvolvedor Backend Pleno
+    periodo: Janeiro/2024 – Atual
+    atividades:
+      - Desenvolvimento de APIs REST com Laravel e PHP 8.
+      - Processamento assíncrono com filas.
+
+projetos:
+  - id: projeto-1
+    nome: Projeto 1
+    link: github.com/seu-usuario/projeto-1
+    descricao: >-
+      O que o projeto faz e com quais tecnologias.
+
+formacao:
+  - curso: Tecnólogo em Análise e Desenvolvimento de Sistemas
+    instituicao: Instituição
+    status: ""
+
+certificacoes: []
+
+competencias:
+  Backend: [PHP, Laravel, APIs REST]
+  Bancos de dados: [PostgreSQL, MySQL]
+
+# Usado só pela nota de compatibilidade (nomes da lista em vagas/tratamento/normalizar.py)
+pontuacao:
+  dominio: [Laravel, PHP, PostgreSQL]
+  conhecimento: [Vue, Docker]
+  cidades_viaveis: [Sua Cidade]

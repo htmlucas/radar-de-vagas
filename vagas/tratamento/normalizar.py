@@ -34,6 +34,19 @@ TECNOLOGIAS = {
     "Filas": r"\bfilas?\b|\bqueues?\b|horizon",
     "Testes": r"phpunit|\bpest\b|testes automatizados|tdd",
     "Tailwind": r"tailwind",
+    # Stacks fora do seu foco: servem para a nota saber o que você NÃO domina.
+    "Drupal": r"drupal",
+    "WordPress": r"wordpress",
+    "Magento": r"magento|adobe commerce",
+    "Java": r"\bjava\b",
+    "Spring": r"\bspring( ?boot)?\b",
+    ".NET": r"\.net\b|\bc#|asp\.net",
+    "Angular": r"\bangular",
+    "Go": r"\bgolang\b",
+    "Ruby": r"\bruby\b|\brails\b",
+    "Flutter": r"flutter",
+    "Kotlin": r"kotlin",
+    "Salesforce": r"salesforce",
 }
 
 # Ordem do menor para o maior: "Pleno/Sênior" vira pleno, porque a vaga aceita pleno.

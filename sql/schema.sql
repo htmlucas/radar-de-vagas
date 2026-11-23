@@ -48,15 +48,40 @@ create table if not exists silver.vaga_status (
     atualizado_em timestamptz not null default now()
 );
 
+-- Nota de compatibilidade com o seu perfil (recalculada a cada coleta).
+create table if not exists silver.vaga_pontuacao (
+    vaga_id         text primary key references silver.vagas (id) on delete cascade,
+    compatibilidade integer not null check (compatibilidade between 0 and 100),
+    motivos         text[]  not null default '{}',
+    calculado_em    timestamptz not null default now()
+);
+
+-- Currículos adaptados gerados para cada vaga.
+create table if not exists silver.curriculos_gerados (
+    id             bigserial primary key,
+    vaga_id        text not null references silver.vagas (id) on delete cascade,
+    pasta          text not null,
+    modelo         text not null,
+    tokens_entrada integer,
+    tokens_saida   integer,
+    lacunas        text[] not null default '{}',
+    gerado_em      timestamptz not null default now()
+);
+create index if not exists curriculos_vaga_idx on silver.curriculos_gerados (vaga_id, gerado_em desc);
+
 -- Gold: uma linha por vaga real (remove a mesma vaga vinda de fontes diferentes),
--- já com o status do usuário.
+-- já com o status do usuário e a nota de compatibilidade.
+-- (Colunas novas sempre no FIM: o Postgres só deixa "create or replace view" acrescentar.)
 create or replace view gold.vagas as
 select distinct on (v.chave_dedupe)
        v.*,
        coalesce(s.status, 'nova') as status,
-       s.nota
+       s.nota,
+       p.compatibilidade,
+       p.motivos
   from silver.vagas v
   left join silver.vaga_status s on s.vaga_id = v.id
+  left join silver.vaga_pontuacao p on p.vaga_id = v.id
  order by v.chave_dedupe, v.publicada_em desc nulls last;
 
 -- Gold: o alvo do projeto. Laravel, nível júnior/pleno ou não informado, não descartada.

@@ -1,5 +1,7 @@
 """Painel de vagas. Rodar com:  streamlit run vagas/painel/app.py"""
 
+import json
+import os
 import sys
 from pathlib import Path
 
@@ -9,6 +11,8 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from vagas import db  # noqa: E402
+from vagas.curriculo import gerar as gerador  # noqa: E402
+from vagas.curriculo.base import CurriculoNaoEncontrado  # noqa: E402
 from vagas.pipeline import rodar  # noqa: E402
 
 st.set_page_config(page_title="Radar de vagas Laravel", page_icon="🎯", layout="wide")
@@ -46,6 +50,64 @@ def ultimas_execucoes() -> pd.DataFrame:
         )
 
 
+@st.cache_data(ttl=60)
+def curriculos_por_vaga() -> dict:
+    """Último currículo gerado de cada vaga."""
+    with db.conectar() as conn:
+        linhas = conn.execute(
+            "select distinct on (vaga_id) * from silver.curriculos_gerados order by vaga_id, gerado_em desc"
+        ).fetchall()
+    return {l["vaga_id"]: l for l in linhas}
+
+
+def cor_da_nota(n) -> str:
+    if n is None or pd.isna(n):
+        return "⚪ —"
+    n = int(n)
+    return f"🟢 {n}" if n >= 75 else f"🟡 {n}" if n >= 60 else f"🔴 {n}"
+
+
+def gerar_curriculo(vaga: dict) -> None:
+    # Lido aqui (e não passado como argumento) para pegar o texto que acabou de ser colado.
+    descricao_completa = st.session_state.get(f"desc-{vaga['id']}", "")
+    try:
+        with st.spinner("O Claude está adaptando seu currículo (leva por volta de 1 minuto)..."):
+            r = gerador.gerar(vaga, descricao_completa or None)
+        db.registrar_curriculo(vaga["id"], r["pasta"], r["modelo"], r["tokens_entrada"],
+                               r["tokens_saida"], r["lacunas"])
+        curriculos_por_vaga.clear()
+        st.toast("Currículo gerado!", icon="📄")
+    except (gerador.FalhaNaGeracao, CurriculoNaoEncontrado) as e:
+        st.error(str(e))
+
+
+def mostrar_curriculo(registro: dict) -> None:
+    pasta = Path(registro["pasta"])
+    if not pasta.exists():
+        st.warning(f"A pasta do currículo gerado não existe mais: {pasta}")
+        return
+    st.caption(f"Gerado em {pd.Timestamp(registro['gerado_em']).tz_convert(FUSO):%d/%m/%Y %H:%M} "
+               f"· {registro['modelo']} · pasta: `{pasta.name}`")
+    d1, d2 = st.columns(2)
+    for col, ext, mime in ((d1, "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+                           (d2, "pdf", "application/pdf")):
+        arquivo = next(pasta.glob(f"*.{ext}"), None)
+        if arquivo:
+            col.download_button(f"⬇️ Baixar .{ext}", arquivo.read_bytes(), file_name=arquivo.name, mime=mime,
+                                key=f"dl-{ext}-{registro['id']}", use_container_width=True)
+    analise_arq = pasta / "analise.json"
+    if analise_arq.exists():
+        analise = json.loads(analise_arq.read_text(encoding="utf-8"))
+        if analise.get("tecnologias_sem_comprovacao"):
+            st.error("⚠️ O texto gerado cita tecnologias que não estão no seu currículo base: "
+                     + ", ".join(analise["tecnologias_sem_comprovacao"]) + ". Revise antes de enviar.")
+        if analise.get("lacunas"):
+            st.markdown("**Requisitos da vaga que seu currículo não cobre** (para se preparar):")
+            st.markdown("\n".join(f"- {x}" for x in analise["lacunas"]))
+        if analise.get("observacoes"):
+            st.markdown(f"**Dicas:** {analise['observacoes']}")
+
+
 def mudar_status(vaga_id: str, status: str | None) -> None:
     db.definir_status(vaga_id, status)
     carregar.clear()
@@ -63,6 +125,7 @@ with st.sidebar:
     modelos_sel = st.multiselect("Modelo de trabalho", list(MODELOS), format_func=MODELOS.get,
                                  placeholder="Todos")
     busca = st.text_input("Buscar no título, empresa ou descrição")
+    ordem = st.radio("Ordenar por", ["Compatibilidade", "Mais recentes"], horizontal=True)
 
     st.divider()
     if st.button("🔄 Coletar vagas agora", use_container_width=True):
@@ -104,6 +167,11 @@ if busca:
     texto = (f["titulo"].fillna("") + " " + f["empresa"].fillna("") + " " + f["descricao"].fillna(""))
     f = f[texto.str.contains(busca, case=False, regex=False)]
 
+if ordem == "Compatibilidade":
+    f = f.sort_values(["compatibilidade", "publicada_em"], ascending=False, na_position="last")
+else:
+    f = f.sort_values("publicada_em", ascending=False, na_position="last")
+
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Vagas na lista", len(f))
 c2.metric("Publicadas nos últimos 7 dias", int((df["publicada_em"] >= agora - pd.Timedelta(days=7)).sum()))
@@ -115,6 +183,9 @@ if f.empty:
     st.stop()
 
 # ---------------------------------------------------------------- lista de vagas
+curriculos = curriculos_por_vaga()
+tem_chave = bool(os.getenv("ANTHROPIC_API_KEY"))
+
 for _, v in f.iterrows():
     with st.container(border=True):
         topo, acoes = st.columns([4, 1.4])
@@ -122,6 +193,7 @@ for _, v in f.iterrows():
             st.markdown(f"#### [{v['titulo']}]({v['url']})")
             data = v["publicada_em"].strftime("%d/%m/%Y") if pd.notna(v["publicada_em"]) else "sem data"
             st.caption(
+                f"**Compatibilidade {cor_da_nota(v['compatibilidade'])}** · "
                 f"**{v['empresa'] or 'Empresa não identificada'}** · {NIVEIS.get(v['nivel'])} · "
                 f"{MODELOS.get(v['modelo_trabalho'])} · {data} · fonte: {v['fonte']} · {STATUS[v['status']]}"
             )
@@ -138,6 +210,30 @@ for _, v in f.iterrows():
                       use_container_width=True)
             b4.button("↩️", key=f"n-{v['id']}", help="Voltar para nova", on_click=mudar_status, args=(v["id"], None),
                       use_container_width=True, disabled=v["status"] == "nova")
-        if v["descricao"]:
-            with st.expander("Ver descrição"):
+        motivos = v["motivos"] if isinstance(v["motivos"], list) else []
+        with st.expander("Detalhes e descrição"):
+            if motivos:
+                st.markdown("**Por que essa nota:**\n" + "\n".join(f"- {m}" for m in motivos))
+            if v["descricao"]:
+                st.divider()
+                if v["fonte"] == "adzuna":
+                    st.caption("A Adzuna só envia um trecho; o texto completo está no link do título.")
                 st.markdown(v["descricao"])
+
+        registro = curriculos.get(v["id"])
+        rotulo = "📄 Currículo gerado para esta vaga" if registro else "📄 Gerar currículo para esta vaga"
+        with st.expander(rotulo):
+            if registro:
+                mostrar_curriculo(registro)
+                st.divider()
+            if not tem_chave:
+                st.info("Para gerar currículos, adicione `ANTHROPIC_API_KEY` no arquivo `.env` "
+                        "e reinicie o painel.")
+                continue
+            st.text_area(
+                "Descrição completa da vaga (opcional)", key=f"desc-{v['id']}", height=120,
+                help="Recomendado quando a descrição acima está cortada (vagas da Adzuna): "
+                     "abra o link da vaga, copie o texto e cole aqui.",
+            )
+            st.button("✨ Gerar de novo" if registro else "✨ Gerar currículo adaptado",
+                      key=f"g-{v['id']}", type="primary", on_click=gerar_curriculo, args=(v.to_dict(),))

@@ -65,6 +65,40 @@ def salvar_vagas(conn, vagas: list[dict]) -> int:
     return novas
 
 
+def salvar_pontuacoes(conn, pontuacoes: list[tuple[str, int, list[str]]]) -> None:
+    with conn.cursor() as cur:
+        cur.executemany(
+            """
+            insert into silver.vaga_pontuacao (vaga_id, compatibilidade, motivos) values (%s, %s, %s)
+            on conflict (vaga_id) do update
+               set compatibilidade = excluded.compatibilidade, motivos = excluded.motivos,
+                   calculado_em = now()
+            """,
+            pontuacoes,
+        )
+
+
+def registrar_curriculo(vaga_id: str, pasta: str, modelo: str, tokens_entrada: int,
+                        tokens_saida: int, lacunas: list[str]) -> None:
+    with conectar() as conn:
+        conn.execute(
+            """
+            insert into silver.curriculos_gerados
+                (vaga_id, pasta, modelo, tokens_entrada, tokens_saida, lacunas)
+            values (%s, %s, %s, %s, %s, %s)
+            """,
+            (vaga_id, pasta, modelo, tokens_entrada, tokens_saida, lacunas),
+        )
+
+
+def ultimo_curriculo(vaga_id: str) -> dict | None:
+    with conectar() as conn:
+        return conn.execute(
+            "select * from silver.curriculos_gerados where vaga_id = %s order by gerado_em desc limit 1",
+            (vaga_id,),
+        ).fetchone()
+
+
 def definir_status(vaga_id: str, status: str | None, nota: str | None = None) -> None:
     with conectar() as conn:
         if status is None:
