@@ -1,7 +1,5 @@
 """Painel de vagas. Rodar com:  streamlit run vagas/painel/app.py"""
 
-import json
-import os
 import sys
 from pathlib import Path
 
@@ -11,7 +9,8 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from vagas import db  # noqa: E402
-from vagas.curriculo import gerar as gerador  # noqa: E402
+from vagas.curriculo import base as curriculo_base  # noqa: E402
+from vagas.curriculo import sugestoes  # noqa: E402
 from vagas.curriculo.base import CurriculoNaoEncontrado  # noqa: E402
 from vagas.pipeline import rodar  # noqa: E402
 
@@ -50,16 +49,6 @@ def ultimas_execucoes() -> pd.DataFrame:
         )
 
 
-@st.cache_data(ttl=60)
-def curriculos_por_vaga() -> dict:
-    """Último currículo gerado de cada vaga."""
-    with db.conectar() as conn:
-        linhas = conn.execute(
-            "select distinct on (vaga_id) * from silver.curriculos_gerados order by vaga_id, gerado_em desc"
-        ).fetchall()
-    return {l["vaga_id"]: l for l in linhas}
-
-
 def cor_da_nota(n) -> str:
     if n is None or pd.isna(n):
         return "⚪ —"
@@ -67,45 +56,31 @@ def cor_da_nota(n) -> str:
     return f"🟢 {n}" if n >= 75 else f"🟡 {n}" if n >= 60 else f"🔴 {n}"
 
 
-def gerar_curriculo(vaga: dict) -> None:
-    # Lido aqui (e não passado como argumento) para pegar o texto que acabou de ser colado.
-    descricao_completa = st.session_state.get(f"desc-{vaga['id']}", "")
+def carregar_base() -> dict | None:
     try:
-        with st.spinner("O Claude está adaptando seu currículo (leva por volta de 1 minuto)..."):
-            r = gerador.gerar(vaga, descricao_completa or None)
-        db.registrar_curriculo(vaga["id"], r["pasta"], r["modelo"], r["tokens_entrada"],
-                               r["tokens_saida"], r["lacunas"])
-        curriculos_por_vaga.clear()
-        st.toast("Currículo gerado!", icon="📄")
-    except (gerador.FalhaNaGeracao, CurriculoNaoEncontrado) as e:
-        st.error(str(e))
+        return curriculo_base.carregar()
+    except CurriculoNaoEncontrado:
+        return None
 
 
-def mostrar_curriculo(registro: dict) -> None:
-    pasta = Path(registro["pasta"])
-    if not pasta.exists():
-        st.warning(f"A pasta do currículo gerado não existe mais: {pasta}")
-        return
-    st.caption(f"Gerado em {pd.Timestamp(registro['gerado_em']).tz_convert(FUSO):%d/%m/%Y %H:%M} "
-               f"· {registro['modelo']} · pasta: `{pasta.name}`")
-    d1, d2 = st.columns(2)
-    for col, ext, mime in ((d1, "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-                           (d2, "pdf", "application/pdf")):
-        arquivo = next(pasta.glob(f"*.{ext}"), None)
-        if arquivo:
-            col.download_button(f"⬇️ Baixar .{ext}", arquivo.read_bytes(), file_name=arquivo.name, mime=mime,
-                                key=f"dl-{ext}-{registro['id']}", use_container_width=True)
-    analise_arq = pasta / "analise.json"
-    if analise_arq.exists():
-        analise = json.loads(analise_arq.read_text(encoding="utf-8"))
-        if analise.get("tecnologias_sem_comprovacao"):
-            st.error("⚠️ O texto gerado cita tecnologias que não estão no seu currículo base: "
-                     + ", ".join(analise["tecnologias_sem_comprovacao"]) + ". Revise antes de enviar.")
-        if analise.get("lacunas"):
-            st.markdown("**Requisitos da vaga que seu currículo não cobre** (para se preparar):")
-            st.markdown("\n".join(f"- {x}" for x in analise["lacunas"]))
-        if analise.get("observacoes"):
-            st.markdown(f"**Dicas:** {analise['observacoes']}")
+def mostrar_sugestoes(vaga: dict, base: dict) -> None:
+    descricao = st.text_area(
+        "Descrição completa da vaga (opcional)", key=f"desc-{vaga['id']}", height=110,
+        help="Deixa as sugestões mais precisas, principalmente nas vagas da Adzuna (que só trazem "
+             "um trecho). Abra o link da vaga, copie o texto, cole aqui e tecle Ctrl+Enter.",
+    )
+    analise = sugestoes.analisar(vaga, base, descricao)
+    texto = sugestoes.formatar(analise)
+
+    aba_sug, aba_prompt = st.tabs(["Sugestões", "Texto para colar num chat de IA"])
+    with aba_sug:
+        st.markdown(texto)
+        st.download_button("⬇️ Baixar sugestões (.txt)", texto, key=f"txt-{vaga['id']}",
+                           file_name=f"sugestoes - {vaga.get('empresa') or 'vaga'}.txt", mime="text/plain")
+    with aba_prompt:
+        st.caption("Opcional. Se quiser uma reescrita completa, copie (ícone no canto do quadro) e cole "
+                   "numa conversa com o assistente de IA que você já usa. Seus dados de contato não vão no texto.")
+        st.code(sugestoes.prompt_para_chat(vaga, base, descricao), language=None, wrap_lines=True)
 
 
 def mudar_status(vaga_id: str, status: str | None) -> None:
@@ -183,8 +158,7 @@ if f.empty:
     st.stop()
 
 # ---------------------------------------------------------------- lista de vagas
-curriculos = curriculos_por_vaga()
-tem_chave = bool(os.getenv("ANTHROPIC_API_KEY"))
+base = carregar_base()
 
 for _, v in f.iterrows():
     with st.container(border=True):
@@ -220,20 +194,11 @@ for _, v in f.iterrows():
                     st.caption("A Adzuna só envia um trecho; o texto completo está no link do título.")
                 st.markdown(v["descricao"])
 
-        registro = curriculos.get(v["id"])
-        rotulo = "📄 Currículo gerado para esta vaga" if registro else "📄 Gerar currículo para esta vaga"
-        with st.expander(rotulo):
-            if registro:
-                mostrar_curriculo(registro)
-                st.divider()
-            if not tem_chave:
-                st.info("Para gerar currículos, adicione `ANTHROPIC_API_KEY` no arquivo `.env` "
-                        "e reinicie o painel.")
-                continue
-            st.text_area(
-                "Descrição completa da vaga (opcional)", key=f"desc-{v['id']}", height=120,
-                help="Recomendado quando a descrição acima está cortada (vagas da Adzuna): "
-                     "abra o link da vaga, copie o texto e cole aqui.",
-            )
-            st.button("✨ Gerar de novo" if registro else "✨ Gerar currículo adaptado",
-                      key=f"g-{v['id']}", type="primary", on_click=gerar_curriculo, args=(v.to_dict(),))
+        # Toggle em vez de expander: o conteúdo só é montado quando você abre,
+        # o que deixa a página leve mesmo com dezenas de vagas.
+        if st.toggle("📝 Sugestões para adaptar seu currículo", key=f"sug-{v['id']}"):
+            if base is None:
+                st.info("Crie o arquivo `curriculo/base/curriculo.yaml` (modelo em `curriculo/exemplo.yaml`) "
+                        "para ver sugestões.")
+            else:
+                mostrar_sugestoes(v.to_dict(), base)

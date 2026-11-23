@@ -1,8 +1,8 @@
 # Radar de vagas Laravel
 
 Pipeline pessoal que coleta vagas de desenvolvedor, filtra as que pedem **Laravel em nível júnior/pleno**,
-dá uma **nota de compatibilidade** com o seu perfil e gera um **currículo adaptado para cada vaga**
-(.docx e PDF) com a API do Claude. Tudo num painel no navegador. Próxima etapa: aviso no Telegram.
+dá uma **nota de compatibilidade** com o seu perfil e mostra **sugestões em texto para adaptar o
+currículo** a cada vaga. Tudo roda localmente, sem custo de API. Próxima etapa: aviso no Telegram.
 
 ## Arquitetura
 
@@ -17,7 +17,7 @@ silver  silver.vagas, silver.vaga_status, silver.execucoes   (PostgreSQL)
    ▼
 gold    gold.vagas (sem duplicadas, com nota) · gold.vagas_alvo (Laravel júnior/pleno)
    ▼
-painel/ Streamlit ──► curriculo/ (Claude) ──► curriculo/gerados/<vaga>/*.docx, *.pdf
+painel/ Streamlit ──► sugestões para o currículo (cruzando a vaga com curriculo/base/curriculo.yaml)
 ```
 
 - **Bronze em arquivo**: dá para reprocessar a silver quando as regras mudarem, sem coletar de novo.
@@ -39,20 +39,23 @@ Regra determinística em `vagas/pontuacao/nota.py`, recalculada a cada coleta pa
 
 O perfil (o que você domina, conhece e as cidades viáveis) fica na seção `pontuacao` do currículo base.
 
-## Currículo adaptado
+## Sugestões para o currículo
 
-1. Seu currículo fica em `curriculo/base/curriculo.yaml` (modelo em `curriculo/exemplo.yaml`).
-2. No painel, em cada vaga, **Gerar currículo adaptado**. Para vagas da Adzuna, cole a descrição completa
-   (a API só traz um trecho).
-3. O Claude (`claude-opus-5-5`, saída estruturada) escolhe e reescreve o conteúdo; o código monta o documento.
+Seu currículo fica em `curriculo/base/curriculo.yaml` (modelo em `curriculo/exemplo.yaml`).
+No painel, ligue **📝 Sugestões para adaptar seu currículo** em uma vaga. As sugestões são calculadas
+localmente (`vagas/curriculo/sugestoes.py`), cruzando tecnologias e temas da vaga com o seu currículo:
 
-Proteções contra invenção:
-- Nome, contato, empresas, cargos, datas, formação e certificações vêm **sempre** do currículo base.
-- Ids de experiência/projeto que não existem no base são descartados.
-- Depois de gerar, o sistema confere se apareceu alguma tecnologia que não está no base e mostra um alerta.
+- **Título sugerido** e **rascunho de resumo**, montados só com o que o currículo comprova;
+- **O que a vaga pede e você comprova**, para usar os mesmos termos da vaga;
+- **Atividades para colocar no topo** de cada experiência, com o motivo de cada uma;
+- **Projetos para destacar**;
+- **O que a vaga pede e não aparece no seu currículo**, para incluir (se tiver) ou se preparar.
 
-Cada geração salva `.docx`, `.pdf` e `analise.json` (lacunas, palavras-chave, dicas, tokens usados)
-em `curriculo/gerados/`. O custo por currículo fica na casa de centavos de dólar.
+Nas vagas da Adzuna, cole a descrição completa no campo da vaga para sugestões mais precisas
+(a API só traz um trecho). As sugestões podem ser baixadas em `.txt`.
+
+Opcional: a aba **Texto para colar num chat de IA** monta um pedido pronto (sem seus dados de contato)
+para colar no assistente de IA que você já usa. O projeto não chama nenhuma API paga.
 
 ## Fontes
 
@@ -68,7 +71,7 @@ Requisitos: Python 3.12+ e Docker Desktop.
 ```bash
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
-copy .env.example .env          # troque a senha do banco e coloque as chaves de API
+copy .env.example .env          # troque a senha do banco e coloque as chaves da Adzuna
 copy curriculo\exemplo.yaml curriculo\base\curriculo.yaml   # e preencha com seus dados
 docker compose up -d            # sobe o Postgres na porta 5440
 ```
@@ -101,11 +104,11 @@ vagas/
 ├── coleta/              um módulo por fonte
 ├── tratamento/          regras de padronização
 ├── pontuacao/nota.py    nota de compatibilidade
-├── curriculo/           leitura do base, geração com Claude, .docx/.pdf
+├── curriculo/           leitura do currículo base e sugestões por vaga
 └── painel/app.py        painel Streamlit
 curriculo/exemplo.yaml   modelo do currículo base
 sql/schema.sql           esquemas silver e gold (idempotente)
-tests/                   testes (a geração é testada com um cliente falso, sem gastar API)
+tests/                   testes das regras de tratamento, nota e sugestões
 ```
 
 ## Privacidade

@@ -8,7 +8,6 @@ __pycache__/
 .env
 dados/
 curriculo/base/
-curriculo/gerados/
 
 # Configuração local do Claude Code
 .claude/

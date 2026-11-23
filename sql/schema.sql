@@ -56,18 +56,8 @@ create table if not exists silver.vaga_pontuacao (
     calculado_em    timestamptz not null default now()
 );
 
--- Currículos adaptados gerados para cada vaga.
-create table if not exists silver.curriculos_gerados (
-    id             bigserial primary key,
-    vaga_id        text not null references silver.vagas (id) on delete cascade,
-    pasta          text not null,
-    modelo         text not null,
-    tokens_entrada integer,
-    tokens_saida   integer,
-    lacunas        text[] not null default '{}',
-    gerado_em      timestamptz not null default now()
-);
-create index if not exists curriculos_vaga_idx on silver.curriculos_gerados (vaga_id, gerado_em desc);
+-- Removida: a geração de currículo com IA foi trocada por sugestões locais em texto.
+drop table if exists silver.curriculos_gerados;
 
 -- Gold: uma linha por vaga real (remove a mesma vaga vinda de fontes diferentes),
 -- já com o status do usuário e a nota de compatibilidade.
