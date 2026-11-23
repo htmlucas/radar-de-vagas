@@ -80,6 +80,48 @@ def test_glassdoor_le_empresa_ignora_nota_e_calcula_a_data():
     assert sem_nota["empresa"] == "LIGHTHOUSE SOLUÇÕES" and sem_nota["publicada_em"].startswith("2026-11-22")
 
 
+ALERTA_INDEED_COM_IDADE = """
+<table>
+  <tr><td><p>Novas vagas desde ontem</p></td></tr>
+  <tr><td><table>
+    <tr><td><a href="https://br.indeed.com/rc/clk?jk=aaaaaaaaaaaaaaaa">Dev PHP Pleno</a></td></tr>
+    <tr><td>Empresa A</td></tr><tr><td>Remoto</td></tr>
+    <tr><td><span>Há 3 dias</span></td></tr>
+  </table></td></tr>
+  <tr><td><table>
+    <tr><td><a href="https://br.indeed.com/rc/clk?jk=bbbbbbbbbbbbbbbb">Dev Laravel Júnior</a></td></tr>
+    <tr><td>Empresa B</td></tr><tr><td>Remoto</td></tr>
+  </table></td></tr>
+</table>
+"""
+
+
+def test_idade_dentro_do_cartao_vira_data_da_vaga():
+    vagas = {v["id_externo"]: v for v in extrair_vagas(ALERTA_INDEED_COM_IDADE, "x", "x", DATA)}
+    assert vagas["aaaaaaaaaaaaaaaa"]["publicada_em"].startswith("2026-11-19")  # 3 dias antes do e-mail
+    # Sem idade no próprio cartão: não pega a da vizinha nem o "desde ontem" do cabeçalho
+    assert vagas["bbbbbbbbbbbbbbbb"]["publicada_em"] == DATA
+
+
+def test_idade_em_dias():
+    from vagas.coleta.emails import idade_em_dias
+    assert idade_em_dias("Há 3 dias") == 3
+    assert idade_em_dias("há 2 semanas") == 14
+    assert idade_em_dias("há 5 horas") == 0
+    assert idade_em_dias("Publicada ontem") == 1
+    assert idade_em_dias("há mais de 30 dias") == 30
+    assert idade_em_dias("Novas vagas desde ontem") is None
+    assert idade_em_dias("30 horas por semana") is None
+
+
+def test_mesma_vaga_em_varios_emails_fica_com_a_data_mais_antiga():
+    from vagas.coleta.gmail import juntar
+    vagas = {}
+    for data in ("2026-11-22T08:00:00+00:00", "2026-11-20T08:00:00+00:00", "2026-11-23T08:00:00+00:00"):
+        juntar(vagas, {"id": "linkedin:1", "publicada_em": data})
+    assert vagas["linkedin:1"]["publicada_em"] == "2026-11-20T08:00:00+00:00"
+
+
 def test_indeed_com_link_de_rastreamento():
     vagas = extrair_vagas(ALERTA_INDEED, "alert@indeed.com", "Vagas de PHP")
     assert len(vagas) == 1

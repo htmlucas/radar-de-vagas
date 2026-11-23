@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from bs4 import BeautifulSoup
 
-from vagas.tratamento.normalizar import montar_vaga
+from vagas.tratamento.normalizar import montar_vaga, sem_acento
 
 # plataforma -> (regex que acha o id da vaga na URL, URL canônica ou None para manter a original)
 PLATAFORMAS = {
@@ -105,6 +105,40 @@ def _linhas_do_bloco(link) -> list[str]:
     return []
 
 
+_IDADE = re.compile(r"\bha\s+(?:mais de\s+)?(\d+)\+?\s*(minutos?|horas?|dias?|semanas?|mes|meses)\b")
+_IDADE_RELATIVA = re.compile(r"\b(?:publicad[ao]|postad[ao]|anunciad[ao])\s+(hoje|ontem)\b")
+_DIAS_POR_UNIDADE = {"minuto": 0, "hora": 0, "dia": 1, "semana": 7, "mes": 30}
+
+
+def idade_em_dias(texto: str) -> int | None:
+    """'há 3 dias' -> 3 · 'há 2 semanas' -> 14 · 'há 5 horas' -> 0 · 'publicada ontem' -> 1."""
+    t = sem_acento(texto)
+    if m := _IDADE.search(t):
+        unidade = m.group(2).rstrip("s").replace("mese", "mes")
+        return int(m.group(1)) * _DIAS_POR_UNIDADE[unidade]
+    if m := _IDADE_RELATIVA.search(t):
+        return 0 if m.group(1) == "hoje" else 1
+    return None
+
+
+def _idade_no_cartao(links: list, chave_do_link: dict, chave) -> int | None:
+    """Procura a idade da vaga no maior bloco do HTML que contém SÓ esta vaga.
+    Subir mais que isso pegaria a idade da vaga vizinha (ou um "vagas desde ontem" do cabeçalho)."""
+    for link in links:
+        bloco, maior = link, None
+        for _ in range(12):
+            bloco = bloco.parent
+            if bloco is None or bloco.name in ("body", "html", "[document]"):
+                break
+            outras = {chave_do_link.get(id(a)) for a in bloco.find_all("a", href=True)} - {None, chave}
+            if outras:
+                break
+            maior = bloco
+        if maior is not None and (dias := idade_em_dias(maior.get_text(" "))) is not None:
+            return dias
+    return None
+
+
 def _titulo(textos: list[str]) -> str | None:
     candidatos = [t for t in textos if len(t) >= 4 and not _GENERICOS.search(t)]
     return max(candidatos, key=len) if candidatos else None
@@ -115,11 +149,13 @@ def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str |
         return []
     sopa = BeautifulSoup(html, "html.parser")
     grupos: dict[tuple[str, str], dict] = {}
+    chave_do_link: dict[int, tuple[str, str]] = {}
     for a in sopa.find_all("a", href=True):
         achado = _identificar(a["href"])
         if not achado:
             continue
         plataforma, id_vaga, url = achado
+        chave_do_link[id(a)] = (plataforma, id_vaga)
         g = grupos.setdefault((plataforma, id_vaga), {"url": url, "textos": [], "links": [], "cartoes": []})
         texto = " ".join(a.get_text(" ").split())
         if texto:
@@ -131,9 +167,13 @@ def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str |
     # o assunto é o título da primeira vaga, não o termo do alerta.
     vagas = []
     for (plataforma, id_vaga), g in grupos.items():
+        # Data da vaga: idade informada no cartão ("há 3 dias") descontada da data do e-mail.
+        # Sem idade no e-mail (ex.: LinkedIn), fica a data do e-mail.
+        dias = _idade_no_cartao(g["links"], chave_do_link, (plataforma, id_vaga))
         cartao = _ler_cartao(plataforma, g["cartoes"])
         if cartao:
-            titulo, empresa, local, dias = cartao
+            titulo, empresa, local, dias_cartao = cartao
+            dias = dias_cartao if dias_cartao is not None else dias
             linhas = max(g["cartoes"], key=len)
             vagas.append(montar_vaga(
                 fonte=plataforma, id_externo=id_vaga, titulo=titulo, url=g["url"],
@@ -162,7 +202,7 @@ def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str |
                 empresa=depois[0] if len(depois) > 0 else None,
                 localizacao=depois[1] if len(depois) > 1 else None,
                 descricao="\n".join(linhas) or None,
-                publicada_em=data,
+                publicada_em=_menos_dias(data, dias),
                 so_titulo=True,  # e-mail traz só o cartão da vaga, não a descrição
             )
         )

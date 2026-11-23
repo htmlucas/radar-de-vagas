@@ -56,7 +56,12 @@ def salvar_vagas(conn, vagas: list[dict]) -> int:
                 localizacao = excluded.localizacao, modelo_trabalho = excluded.modelo_trabalho,
                 nivel = excluded.nivel, tecnologias = excluded.tecnologias,
                 cita_laravel = excluded.cita_laravel, chave_dedupe = excluded.chave_dedupe,
-                publicada_em = excluded.publicada_em, so_titulo = excluded.so_titulo,
+                -- Vagas de e-mail (sem data de publicação real): mantém a mais antiga já vista,
+                -- para a data não "andar" a cada alerta repetido.
+                publicada_em = case when excluded.so_titulo
+                                    then least(silver.vagas.publicada_em, excluded.publicada_em)
+                                    else excluded.publicada_em end,
+                so_titulo = excluded.so_titulo,
                 ultima_coleta = now()
             returning (xmax = 0) as inserida
             """,

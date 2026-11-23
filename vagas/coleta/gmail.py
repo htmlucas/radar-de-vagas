@@ -131,8 +131,16 @@ def coletar() -> tuple[list[dict], list[str]]:
     vagas: dict[str, dict] = {}
     for e in emails:
         for v in extrair_vagas(e["html"], remetente=e["remetente"], assunto=e["assunto"], data=e["data"]):
-            vagas.setdefault(v["id"], v)  # a mesma vaga pode vir em vários alertas
+            juntar(vagas, v)
     return list(vagas.values()), [str(arquivo)]
+
+
+def juntar(vagas: dict[str, dict], v: dict) -> None:
+    """A mesma vaga pode vir em vários alertas. Fica a data mais antiga:
+    é a mais próxima de quando a vaga foi publicada."""
+    atual = vagas.get(v["id"])
+    if atual is None or (v["publicada_em"] and (not atual["publicada_em"] or v["publicada_em"] < atual["publicada_em"])):
+        vagas[v["id"]] = v
 
 
 # --------------------------------------------------------------------------- linha de comando
@@ -159,7 +167,7 @@ def _testar(dias: int) -> None:
     vagas: dict[str, dict] = {}
     for e in ler_emails(dias):
         for v in extrair_vagas(e["html"], e["remetente"], e["assunto"], e["data"]):
-            vagas.setdefault(v["id"], v)
+            juntar(vagas, v)
     print(f"{len(vagas)} vagas extraídas (nada foi gravado)\n")
     for v in list(vagas.values())[:60]:
         print(f"[{v['fonte']}] {v['titulo'][:60]} | {v['empresa']} | {v['localizacao']} | laravel={v['cita_laravel']}")
