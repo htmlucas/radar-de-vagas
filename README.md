@@ -152,32 +152,43 @@ copy curriculo\exemplo.yaml curriculo\base\curriculo.yaml   # e preencha com seu
 docker compose up -d            # sobe o Postgres na porta 5440
 ```
 
-Coletar vagas:
+### Como o Python roda
+
+Tudo roda com o ambiente virtual do projeto, `.venv\Scripts\python.exe` (nunca o Python do sistema).
+São três peças, e as duas de Python dependem do banco estar no ar:
+
+| O quê | Comando | Como roda |
+|---|---|---|
+| **Coleta** (pipeline) | `.venv\Scripts\python -m vagas.pipeline` | Sozinha, todo dia às 8h (tarefa `ColetaDiaria`); ou pelo botão "Coletar agora" em Configurações |
+| **Painel** (Streamlit, servidor web em `localhost:8501`) | `.venv\Scripts\python -m streamlit run vagas/painel/app.py` | Sozinho ao fazer logon no Windows (tarefa `Painel`); ou pelo atalho "Radar de Vagas" da Área de Trabalho |
+| **Banco** (PostgreSQL) | `docker compose up -d` | Docker Desktop, que já inicia com o Windows |
+
+O painel é um servidor que fica no ar: se ninguém o iniciar, `localhost:8501` não abre.
+
+### Execução automática (Windows)
+
+O script `scripts\agendar.ps1` cria duas tarefas no Agendador de Tarefas (pasta `\RadarDeVagas\`):
+
+- **`ColetaDiaria`**: coleta **todo dia às 8h** e, como rede de segurança, **3 minutos depois de fazer logon**
+  (recupera uma coleta perdida com o PC desligado). O script abre o Docker Desktop se estiver fechado, garante
+  o banco no ar, roda o pipeline e grava o log em `dados/logs/coleta-AAAA-MM-DD.log` (logs com mais de 30 dias
+  são apagados). Se já houve uma coleta bem-sucedida há menos de 4 horas, ele pula (`-Forcar` ignora a trava).
+- **`Painel`**: sobe o painel ao fazer logon, sem janela, esperando o banco ficar pronto; log em
+  `dados/logs/painel.log`. Não abre um segundo servidor se já estiver no ar.
+
+Também cria o atalho **Radar de Vagas** na Área de Trabalho, que inicia o painel (se estiver desligado) e abre
+o navegador. A página **Configurações** mostra o horário, a próxima execução e o resultado da última coleta.
 
 ```bash
-.venv\Scripts\python -m vagas.pipeline
+powershell -ExecutionPolicy Bypass -File scripts\agendar.ps1                  # criar/atualizar (08:00)
+powershell -ExecutionPolicy Bypass -File scripts\agendar.ps1 -Horario 07:30   # outro horário
+powershell -ExecutionPolicy Bypass -File scripts\agendar.ps1 -SemPainel       # só a coleta (remove painel e atalho)
+powershell -ExecutionPolicy Bypass -File scripts\coletar.ps1 -Forcar          # coletar agora, à mão
+powershell -ExecutionPolicy Bypass -File scripts\painel.ps1                   # iniciar o painel, à mão
 ```
 
-### Coleta automática (Windows)
-
-Uma tarefa no Agendador de Tarefas roda a coleta **todo dia às 8h**. Se o PC estiver desligado nesse
-horário, ela roda assim que ele ligar. O script abre o Docker Desktop se estiver fechado, garante o banco
-no ar, roda o pipeline e grava o log em `dados/logs/coleta-AAAA-MM-DD.log` (logs com mais de 30 dias são
-apagados). A página **Configurações** mostra o horário, a próxima execução e o resultado da última.
-
-```bash
-powershell -ExecutionPolicy Bypass -File scripts\agendar.ps1 -Horario 08:00   # criar/alterar
-powershell -ExecutionPolicy Bypass -File scripts\coletar.ps1                  # rodar agora, à mão
-```
-
-Para remover: `Unregister-ScheduledTask -TaskPath "\RadarDeVagas\" -TaskName "ColetaDiaria"`.
-A tarefa roda com o seu usuário e só quando você está logado no Windows.
-
-Abrir o painel (http://localhost:8501):
-
-```bash
-.venv\Scripts\python -m streamlit run vagas/painel/app.py
-```
+Para remover tudo: `Unregister-ScheduledTask -TaskPath "\RadarDeVagas\" -TaskName "ColetaDiaria" -Confirm:$false`
+e o mesmo com `"Painel"`. As tarefas rodam com o seu usuário e só com você logado no Windows.
 
 Testes:
 

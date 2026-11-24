@@ -4,6 +4,12 @@
 # 1. Garante que o Docker e o banco estejam no ar (abre o Docker Desktop se estiver fechado).
 # 2. Roda o pipeline (coleta -> bronze -> silver -> notas).
 # 3. Grava tudo em dados\logs\coleta-AAAA-MM-DD.log e apaga logs com mais de 30 dias.
+#
+# A tarefa agendada tem dois gatilhos (todo dia no horario e 3 min depois de fazer logon, para recuperar
+# uma coleta perdida com o PC desligado). Se ja houve uma coleta bem-sucedida ha menos de 4 horas, este
+# script nao coleta de novo. -Forcar ignora essa trava. O botao "Coletar agora" do painel nao passa por aqui.
+
+param([switch]$Forcar)
 
 $ErrorActionPreference = "Continue"
 $raiz = Split-Path -Parent $PSScriptRoot
@@ -20,6 +26,19 @@ function Registrar([string]$texto) {
 function DockerNoAr {
     docker info --format "{{.ServerVersion}}" *> $null
     return ($LASTEXITCODE -eq 0)
+}
+
+# --- Trava: ja coletou com sucesso ha pouco?
+if (-not $Forcar -and (Test-Path $log)) {
+    $ultimo = Select-String -Path $log -Pattern 'Fim da coleta \(c.digo 0\)' -Encoding UTF8 | Select-Object -Last 1
+    if ($ultimo -and $ultimo.Line -match '(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})') {
+        $quando = [datetime]::ParseExact($Matches[1], "yyyy-MM-dd HH:mm:ss", [Globalization.CultureInfo]::InvariantCulture)
+        $minutos = [int]((Get-Date) - $quando).TotalMinutes
+        if ($minutos -ge 0 -and $minutos -lt 240) {
+            Registrar "Coleta pulada: a ultima bem-sucedida foi ha $minutos min (use -Forcar para coletar mesmo assim)."
+            exit 0
+        }
+    }
 }
 
 Registrar "=== Início da coleta"
