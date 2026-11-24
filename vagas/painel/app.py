@@ -9,7 +9,9 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from vagas.painel import ui  # noqa: E402
-from vagas.painel.comum import ha_quanto, perfil_publico, situacao_execucao, ultimas_execucoes  # noqa: E402
+from vagas.painel.comum import (  # noqa: E402
+    banco_disponivel, ha_quanto, perfil_publico, situacao_execucao, ultimas_execucoes,
+)
 from vagas.painel.navegacao import PAGINAS  # noqa: E402
 from vagas.painel.paginas import (  # noqa: E402
     candidaturas, configuracoes, relatorios, sugestoes, vagas, visao_geral,
@@ -21,6 +23,36 @@ st.set_page_config(page_title="Radar de Vagas", page_icon=str(ASSETS / "icone.sv
                    initial_sidebar_state="auto")  # aberta em tela larga, recolhida no celular
 ui.aplicar_estilo()
 st.logo(str(ASSETS / "logo.svg"), size="large", icon_image=str(ASSETS / "icone.svg"))
+
+
+@st.fragment(run_every=5)
+def _aguardar_banco() -> None:
+    """Confere o banco a cada 5 s e recarrega o painel sozinho assim que ele voltar."""
+    if banco_disponivel()[0]:
+        st.rerun()
+    st.caption("Verificando o banco a cada 5 segundos...")
+
+
+def pagina_sem_banco(erro: str) -> None:
+    ui.cabecalho("Banco de dados indisponível",
+                 "O painel está no ar, mas não consegue falar com o banco.", "database")
+    with st.container(border=True):
+        st.markdown(
+            "Isso costuma acontecer quando o **Docker Desktop** está fechado ou ainda iniciando.\n\n"
+            "1. Abra o Docker Desktop e espere o container **vagas-laravel-db** ficar em *Running*.\n"
+            "2. Pronto: este painel confere sozinho e volta ao normal quando o banco responder. "
+            "Não precisa recarregar a página."
+        )
+        _aguardar_banco()
+        st.button("Tentar agora", icon=":material/refresh:", type="primary")
+        with st.expander("Detalhes técnicos"):
+            st.code(erro, language=None, wrap_lines=True)
+
+
+_banco_ok, _banco_erro = banco_disponivel()
+if not _banco_ok:
+    pagina_sem_banco(_banco_erro or "sem detalhes")
+    st.stop()
 
 PAGINAS.update({
     "visao_geral": st.Page(visao_geral.pagina, title="Visão geral", icon=":material/space_dashboard:",

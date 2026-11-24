@@ -5,6 +5,7 @@ import os
 import subprocess
 
 import pandas as pd
+import psycopg
 import streamlit as st
 
 from vagas import db, relatorios
@@ -42,6 +43,16 @@ MOTIVOS_DESCARTE = [
 ]
 SEM_MOTIVO = relatorios.SEM_MOTIVO
 FONTES_COLETA = ["github", "adzuna", "gmail"]  # coletores (o gmail traz linkedin/glassdoor/indeed)
+
+
+def banco_disponivel() -> tuple[bool, str | None]:
+    """O banco responde? (True, None) ou (False, mensagem técnica). Falha rápido (2 s por endereço)."""
+    try:
+        with psycopg.connect(config.conninfo, connect_timeout=2) as conn:
+            conn.execute("select 1")
+        return True, None
+    except psycopg.Error as e:
+        return False, " ".join(str(e).split())
 
 
 # --------------------------------------------------------------------------- vagas

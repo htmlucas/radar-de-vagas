@@ -163,7 +163,9 @@ São três peças, e as duas de Python dependem do banco estar no ar:
 | **Painel** (Streamlit, servidor web em `localhost:8501`) | `.venv\Scripts\python -m streamlit run vagas/painel/app.py` | Sozinho ao fazer logon no Windows (tarefa `Painel`); ou pelo atalho "Radar de Vagas" da Área de Trabalho |
 | **Banco** (PostgreSQL) | `docker compose up -d` | Docker Desktop, que já inicia com o Windows |
 
-O painel é um servidor que fica no ar: se ninguém o iniciar, `localhost:8501` não abre.
+O painel é um servidor que fica no ar: se ninguém o iniciar, `localhost:8501` não abre. O painel **não depende do
+Docker para subir**: se o Docker estiver fechado, ele continua no ar e mostra "Banco de dados indisponível",
+verificando o banco a cada 5 segundos e voltando ao normal sozinho quando o container responder.
 
 ### Execução automática (Windows)
 

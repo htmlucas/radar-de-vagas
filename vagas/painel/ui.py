@@ -175,7 +175,8 @@ CSS = """
   --rv-sombra: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .04);
   --rv-raio: 12px;
 }
-.block-container { padding-top: 2.2rem; padding-bottom: 4rem; max-width: 1260px; }
+/* Topo com folga: com a barra lateral recolhida o cabeçalho do Streamlit cobre o início da página */
+.block-container { padding-top: 3.8rem; padding-bottom: 4rem; max-width: 1260px; }
 h1, h2, h3 { letter-spacing: -0.01em; }
 
 /* Contêineres com borda viram cartões brancos */
