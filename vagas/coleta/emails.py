@@ -144,7 +144,10 @@ def _titulo(textos: list[str]) -> str | None:
     return max(candidatos, key=len) if candidatos else None
 
 
-def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str | None = None) -> list[dict]:
+def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str | None = None,
+                  montar=montar_vaga) -> list[dict]:
+    """`montar` monta cada vaga (padrão: a da trilha Laravel). Outra trilha passa a sua função; se ela
+    devolver None, a vaga não pertence à trilha e é descartada."""
     if not html:
         return []
     sopa = BeautifulSoup(html, "html.parser")
@@ -175,12 +178,14 @@ def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str |
             titulo, empresa, local, dias_cartao = cartao
             dias = dias_cartao if dias_cartao is not None else dias
             linhas = max(g["cartoes"], key=len)
-            vagas.append(montar_vaga(
+            vaga = montar(
                 fonte=plataforma, id_externo=id_vaga, titulo=titulo, url=g["url"],
                 empresa=empresa, localizacao=local, descricao="\n".join(linhas),
                 publicada_em=_menos_dias(data, dias),
                 so_titulo=True,
-            ))
+            )
+            if vaga is not None:
+                vagas.append(vaga)
             continue
 
         titulo = _titulo(g["textos"])
@@ -193,19 +198,19 @@ def extrair_vagas(html: str, remetente: str = "", assunto: str = "", data: str |
                 break
         depois = linhas[linhas.index(titulo) + 1:] if titulo in linhas else []
         depois = [l for l in depois if not _GENERICOS.search(l)]
-        vagas.append(
-            montar_vaga(
-                fonte=plataforma,
-                id_externo=id_vaga,
-                titulo=titulo,
-                url=g["url"],
-                empresa=depois[0] if len(depois) > 0 else None,
-                localizacao=depois[1] if len(depois) > 1 else None,
-                descricao="\n".join(linhas) or None,
-                publicada_em=_menos_dias(data, dias),
-                so_titulo=True,  # e-mail traz só o cartão da vaga, não a descrição
-            )
+        vaga = montar(
+            fonte=plataforma,
+            id_externo=id_vaga,
+            titulo=titulo,
+            url=g["url"],
+            empresa=depois[0] if len(depois) > 0 else None,
+            localizacao=depois[1] if len(depois) > 1 else None,
+            descricao="\n".join(linhas) or None,
+            publicada_em=_menos_dias(data, dias),
+            so_titulo=True,  # e-mail traz só o cartão da vaga, não a descrição
         )
+        if vaga is not None:
+            vagas.append(vaga)
     return vagas
 
 

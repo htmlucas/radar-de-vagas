@@ -1,0 +1,21 @@
+{
+  "backend-br/vagas": [
+    {"number": 101, "title": "[Remoto] Desenvolvedor PHP/Laravel Júnior na Acme", "html_url": "https://github.com/backend-br/vagas/issues/101",
+     "body": "Requisitos: Laravel, PHP, PostgreSQL, Docker, filas e testes automatizados.\nTrabalho 100% remoto.",
+     "created_at": "2026-11-20T10:00:00Z", "labels": [{"name": "Júnior"}]},
+    {"number": 102, "title": "[Remoto] Senior Backend Engineer PHP + Laravel na Beta Tech (PJ, LATAM)", "html_url": "https://github.com/backend-br/vagas/issues/102",
+     "body": "Laravel, AWS, SQS, Kubernetes, Redis, Docker, Terraform.", "created_at": "2026-11-19T10:00:00Z", "labels": [{"name": "Sênior"}]},
+    {"number": 103, "title": "[Remoto] Engenheiro de Dados Júnior - Gama Dados", "html_url": "https://github.com/backend-br/vagas/issues/103",
+     "body": "Python, SQL, Airflow, Spark e AWS. Pipelines de dados.", "created_at": "2026-11-21T10:00:00Z", "labels": []},
+    {"number": 104, "title": "Regras para divulgação de vagas", "html_url": "https://github.com/backend-br/vagas/issues/104",
+     "body": "Leia antes de publicar.", "created_at": "2026-01-01T10:00:00Z", "labels": []},
+    {"number": 105, "title": "[Híbrido] Desenvolvedor Backend Pleno - Delta Sistemas", "html_url": "https://github.com/backend-br/vagas/issues/105",
+     "body": "Java, Spring Boot e MySQL em São Paulo.", "created_at": "2026-11-18T10:00:00Z", "labels": [{"name": "Pleno"}]}
+  ],
+  "phpdevbr/vagas": [
+    {"number": 7, "title": "Hibrido Alfaville - Programador PHP Pleno - Epsilon TI", "html_url": "https://github.com/phpdevbr/vagas/issues/7",
+     "body": "PHP, Laravel, MySQL e Vue. Presencial/híbrido em Alfaville.", "created_at": "2026-11-17T10:00:00Z", "labels": []},
+    {"number": 8, "title": "Estágio em Desenvolvimento PHP (Laravel) na Zeta", "html_url": "https://github.com/phpdevbr/vagas/issues/8",
+     "body": "Laravel e MySQL. Home office.", "created_at": "2026-11-22T10:00:00Z", "labels": []}
+  ]
+}

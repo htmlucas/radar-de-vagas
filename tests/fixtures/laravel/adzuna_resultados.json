@@ -1,0 +1,13 @@
+{
+  "results": [
+    {"id": "9001", "title": "Desenvolvedor PHP/Laravel Júnior na Acme", "redirect_url": "https://exemplo.test/adzuna/9001",
+     "company": {"display_name": "Acme"}, "description": "Vaga remota para desenvolvedor com PHP e Laravel...",
+     "location": {"display_name": "Brasil"}, "created": "2026-11-21T08:00:00Z"},
+    {"id": "9002", "title": "Desenvolvedor Backend Pleno", "redirect_url": "https://exemplo.test/adzuna/9002",
+     "company": {"display_name": "Eta Software"}, "description": "Equipe em Gamaville, SP, trabalho presencial. Laravel, PHP, PostgreSQL, Redis, Docker, AWS e Livewire.",
+     "location": {"display_name": "Gamaville, SP"}, "created": "2026-11-16T08:00:00Z"},
+    {"id": "9003", "title": "Analista de Suporte N2", "redirect_url": "https://exemplo.test/adzuna/9003",
+     "company": {"display_name": "Theta Serviços"}, "description": "Atendimento a clientes de um sistema em Laravel.",
+     "location": {"display_name": "São Paulo, SP"}, "created": "2026-11-15T08:00:00Z"}
+  ]
+}

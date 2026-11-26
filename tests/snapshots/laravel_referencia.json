@@ -1,0 +1,906 @@
+{
+ "alvo_ids": [
+  "adzuna:9002",
+  "adzuna:9003",
+  "github:backend-br/vagas#101",
+  "github:phpdevbr/vagas#7",
+  "github:phpdevbr/vagas#8",
+  "glassdoor:7000000001",
+  "indeed:cccccccccccccccc",
+  "linkedin:5000000001"
+ ],
+ "contagem_por_fonte": {
+  "adzuna": 3,
+  "github": 6,
+  "glassdoor": 1,
+  "indeed": 1,
+  "linkedin": 2
+ },
+ "gold_ids": [
+  "adzuna:9002",
+  "adzuna:9003",
+  "github:backend-br/vagas#101",
+  "github:backend-br/vagas#102",
+  "github:backend-br/vagas#103",
+  "github:backend-br/vagas#105",
+  "github:phpdevbr/vagas#7",
+  "github:phpdevbr/vagas#8",
+  "glassdoor:7000000001",
+  "indeed:cccccccccccccccc",
+  "linkedin:5000000001",
+  "linkedin:5000000002"
+ ],
+ "painel": {
+  "aguardando_retorno": [
+   {
+    "dias_sem_retorno": 11,
+    "id": "adzuna:9003"
+   },
+   {
+    "dias_sem_retorno": 8,
+    "id": "github:backend-br/vagas#103"
+   }
+  ],
+  "classificacao": {
+   "0": [
+    "Baixa",
+    "erro"
+   ],
+   "100": [
+    "Alta",
+    "sucesso"
+   ],
+   "59": [
+    "Baixa",
+    "erro"
+   ],
+   "60": [
+    "Média",
+    "atencao"
+   ],
+   "74": [
+    "Média",
+    "atencao"
+   ],
+   "75": [
+    "Alta",
+    "sucesso"
+   ]
+  },
+  "descartadas": [
+   "github:backend-br/vagas#102"
+  ],
+  "distribuicao_modelo": [
+   {
+    "categoria": "Remoto",
+    "vagas": 6
+   },
+   {
+    "categoria": "Híbrido",
+    "vagas": 3
+   },
+   {
+    "categoria": "Presencial",
+    "vagas": 1
+   },
+   {
+    "categoria": "Não informado",
+    "vagas": 2
+   }
+  ],
+  "distribuicao_nivel": [
+   {
+    "categoria": "Júnior",
+    "vagas": 3
+   },
+   {
+    "categoria": "Pleno",
+    "vagas": 4
+   },
+   {
+    "categoria": "Sênior",
+    "vagas": 2
+   },
+   {
+    "categoria": "Não informado",
+    "vagas": 3
+   }
+  ],
+  "empresas": [
+   {
+    "empresa": "Eta Software",
+    "nota_media": 98.0,
+    "sua_situacao": "interessa",
+    "ultima_vaga": "2026-11-16T08:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Acme",
+    "nota_media": 91.0,
+    "sua_situacao": "entrevista",
+    "ultima_vaga": "2026-11-20T10:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Epsilon TI",
+    "nota_media": 90.0,
+    "sua_situacao": "nova",
+    "ultima_vaga": "2026-11-17T10:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Mu Consultoria",
+    "nota_media": 83.0,
+    "sua_situacao": "nova",
+    "ultima_vaga": "2026-11-20T08:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Iota Digital",
+    "nota_media": 81.0,
+    "sua_situacao": "nova",
+    "ultima_vaga": "2026-11-22T08:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Lambda Soluções",
+    "nota_media": 80.0,
+    "sua_situacao": "nova",
+    "ultima_vaga": "2026-11-17T08:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Beta Tech",
+    "nota_media": 77.0,
+    "sua_situacao": "descartada",
+    "ultima_vaga": "2026-11-19T10:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Zeta",
+    "nota_media": 75.0,
+    "sua_situacao": "nova",
+    "ultima_vaga": "2026-11-22T10:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Kappa Labs",
+    "nota_media": 62.0,
+    "sua_situacao": "nova",
+    "ultima_vaga": "2026-11-22T08:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Delta Sistemas",
+    "nota_media": 49.0,
+    "sua_situacao": "recusado",
+    "ultima_vaga": "2026-11-18T10:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Gama Dados",
+    "nota_media": 43.0,
+    "sua_situacao": "candidatei",
+    "ultima_vaga": "2026-11-21T10:00:00.000Z",
+    "vagas": 1
+   },
+   {
+    "empresa": "Theta Serviços",
+    "nota_media": 38.0,
+    "sua_situacao": "candidatei",
+    "ultima_vaga": "2026-11-15T08:00:00.000Z",
+    "vagas": 1
+   }
+  ],
+  "esquecidas": [
+   "github:phpdevbr/vagas#7",
+   "github:phpdevbr/vagas#8",
+   "glassdoor:7000000001",
+   "indeed:cccccccccccccccc",
+   "linkedin:5000000001",
+   "linkedin:5000000002"
+  ],
+  "faixas_de_nota": [
+   {
+    "faixa": "0–9",
+    "vagas": 0
+   },
+   {
+    "faixa": "10–19",
+    "vagas": 0
+   },
+   {
+    "faixa": "20–29",
+    "vagas": 0
+   },
+   {
+    "faixa": "30–39",
+    "vagas": 1
+   },
+   {
+    "faixa": "40–49",
+    "vagas": 2
+   },
+   {
+    "faixa": "50–59",
+    "vagas": 0
+   },
+   {
+    "faixa": "60–69",
+    "vagas": 1
+   },
+   {
+    "faixa": "70–79",
+    "vagas": 2
+   },
+   {
+    "faixa": "80–89",
+    "vagas": 3
+   },
+   {
+    "faixa": "90–99",
+    "vagas": 3
+   }
+  ],
+  "filtros": {
+   "busca": [
+    "github:backend-br/vagas#101"
+   ],
+   "dia": [
+    "github:backend-br/vagas#103"
+   ],
+   "junior": [
+    "github:backend-br/vagas#101",
+    "github:backend-br/vagas#103",
+    "linkedin:5000000001"
+   ],
+   "laravel": [
+    "adzuna:9002",
+    "adzuna:9003",
+    "github:backend-br/vagas#101",
+    "github:backend-br/vagas#102",
+    "github:phpdevbr/vagas#7",
+    "github:phpdevbr/vagas#8",
+    "glassdoor:7000000001",
+    "linkedin:5000000001"
+   ],
+   "padrao": [
+    "adzuna:9002",
+    "adzuna:9003",
+    "github:backend-br/vagas#101",
+    "github:phpdevbr/vagas#7",
+    "github:phpdevbr/vagas#8",
+    "glassdoor:7000000001",
+    "indeed:cccccccccccccccc",
+    "linkedin:5000000001"
+   ],
+   "remoto": [
+    "github:backend-br/vagas#101",
+    "github:backend-br/vagas#102",
+    "github:backend-br/vagas#103",
+    "github:phpdevbr/vagas#8",
+    "glassdoor:7000000001",
+    "linkedin:5000000001"
+   ],
+   "todas": [
+    "adzuna:9002",
+    "adzuna:9003",
+    "github:backend-br/vagas#101",
+    "github:backend-br/vagas#102",
+    "github:backend-br/vagas#103",
+    "github:backend-br/vagas#105",
+    "github:phpdevbr/vagas#7",
+    "github:phpdevbr/vagas#8",
+    "glassdoor:7000000001",
+    "indeed:cccccccccccccccc",
+    "linkedin:5000000001",
+    "linkedin:5000000002"
+   ]
+  },
+  "funil": [
+   {
+    "etapa": "Interessei",
+    "vagas": 5
+   },
+   {
+    "etapa": "Me candidatei",
+    "vagas": 4
+   },
+   {
+    "etapa": "Entrevista",
+    "vagas": 1
+   },
+   {
+    "etapa": "Proposta",
+    "vagas": 0
+   }
+  ],
+  "minhas_candidaturas": [
+   "adzuna:9003",
+   "github:backend-br/vagas#101",
+   "github:backend-br/vagas#103",
+   "github:backend-br/vagas#105"
+  ],
+  "ordem_compatibilidade": [
+   "adzuna:9002",
+   "github:backend-br/vagas#101",
+   "github:phpdevbr/vagas#7",
+   "indeed:cccccccccccccccc",
+   "linkedin:5000000001",
+   "glassdoor:7000000001",
+   "github:backend-br/vagas#102",
+   "github:phpdevbr/vagas#8",
+   "linkedin:5000000002",
+   "github:backend-br/vagas#105",
+   "github:backend-br/vagas#103",
+   "adzuna:9003"
+  ],
+  "ordem_empresa": [
+   "github:backend-br/vagas#101",
+   "github:backend-br/vagas#102",
+   "github:backend-br/vagas#105",
+   "github:phpdevbr/vagas#7",
+   "adzuna:9002",
+   "github:backend-br/vagas#103",
+   "linkedin:5000000001",
+   "linkedin:5000000002",
+   "glassdoor:7000000001",
+   "indeed:cccccccccccccccc",
+   "adzuna:9003",
+   "github:phpdevbr/vagas#8"
+  ],
+  "por_fonte": [
+   {
+    "fonte": "github",
+    "no_alvo": 3,
+    "nota_media_alvo": 85.0,
+    "pct_alvo": 0.5,
+    "vagas": 6
+   },
+   {
+    "fonte": "adzuna",
+    "no_alvo": 2,
+    "nota_media_alvo": 68.0,
+    "pct_alvo": 1.0,
+    "vagas": 2
+   },
+   {
+    "fonte": "glassdoor",
+    "no_alvo": 1,
+    "nota_media_alvo": 80.0,
+    "pct_alvo": 1.0,
+    "vagas": 1
+   },
+   {
+    "fonte": "indeed",
+    "no_alvo": 1,
+    "nota_media_alvo": 83.0,
+    "pct_alvo": 1.0,
+    "vagas": 1
+   },
+   {
+    "fonte": "linkedin",
+    "no_alvo": 1,
+    "nota_media_alvo": 81.0,
+    "pct_alvo": 0.5,
+    "vagas": 2
+   }
+  ],
+  "relatorio_filtrar": [
+   "adzuna:9002",
+   "adzuna:9003",
+   "github:backend-br/vagas#101",
+   "github:phpdevbr/vagas#7",
+   "github:phpdevbr/vagas#8",
+   "glassdoor:7000000001",
+   "indeed:cccccccccccccccc",
+   "linkedin:5000000001"
+  ],
+  "resumo_candidaturas": {
+   "candidaturas": 4,
+   "entrevistas": 1,
+   "interessa": 1,
+   "propostas": 0,
+   "recusados": 1,
+   "taxa_entrevista": 0.25,
+   "taxa_resposta": 0.5
+  },
+  "tecnologias": [
+   {
+    "pct": 0.875,
+    "situacao": "Você domina",
+    "tecnologia": "Laravel",
+    "vagas": 7
+   },
+   {
+    "pct": 0.625,
+    "situacao": "Você domina",
+    "tecnologia": "PHP",
+    "vagas": 5
+   },
+   {
+    "pct": 0.25,
+    "situacao": "Você domina",
+    "tecnologia": "PostgreSQL",
+    "vagas": 2
+   },
+   {
+    "pct": 0.25,
+    "situacao": "Você domina",
+    "tecnologia": "Docker",
+    "vagas": 2
+   },
+   {
+    "pct": 0.25,
+    "situacao": "Você domina",
+    "tecnologia": "MySQL",
+    "vagas": 2
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você domina",
+    "tecnologia": "Livewire",
+    "vagas": 1
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você domina",
+    "tecnologia": "Redis",
+    "vagas": 1
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você domina",
+    "tecnologia": "AWS",
+    "vagas": 1
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você domina",
+    "tecnologia": "Filas",
+    "vagas": 1
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você conhece",
+    "tecnologia": "Testes",
+    "vagas": 1
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você conhece",
+    "tecnologia": "Vue",
+    "vagas": 1
+   },
+   {
+    "pct": 0.125,
+    "situacao": "Você domina",
+    "tecnologia": "Lambda",
+    "vagas": 1
+   }
+  ],
+  "tempo_ate_candidatar": -3.3,
+  "vagas_por_semana": [
+   {
+    "fonte": "adzuna",
+    "semana": "2026-11-09T00:00:00.000",
+    "vagas": 1
+   },
+   {
+    "fonte": "adzuna",
+    "semana": "2026-11-16T00:00:00.000",
+    "vagas": 1
+   },
+   {
+    "fonte": "github",
+    "semana": "2026-11-16T00:00:00.000",
+    "vagas": 6
+   },
+   {
+    "fonte": "glassdoor",
+    "semana": "2026-11-16T00:00:00.000",
+    "vagas": 1
+   },
+   {
+    "fonte": "indeed",
+    "semana": "2026-11-16T00:00:00.000",
+    "vagas": 1
+   },
+   {
+    "fonte": "linkedin",
+    "semana": "2026-11-16T00:00:00.000",
+    "vagas": 2
+   }
+  ]
+ },
+ "vagas": [
+  {
+   "alvo": true,
+   "chave_dedupe": "desenvolvedorphplaraveljuniornaacme|acme",
+   "chave_dedupe_recalculada": "desenvolvedorphplaraveljuniornaacme|acme",
+   "cita_laravel": true,
+   "descricao": "Vaga remota para desenvolvedor com PHP e Laravel...",
+   "empresa": "Acme",
+   "fonte": "adzuna",
+   "id": "adzuna:9001",
+   "id_externo": "9001",
+   "localizacao": "Brasil",
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: Laravel, PHP",
+    "🏠 Remoto"
+   ],
+   "nivel": "junior",
+   "nota": 81,
+   "publicada_em": "2026-11-21T08:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel",
+    "PHP"
+   ],
+   "titulo": "Desenvolvedor PHP/Laravel Júnior na Acme",
+   "url": "https://exemplo.test/adzuna/9001"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "desenvolvedorbackendpleno|etasoftware",
+   "chave_dedupe_recalculada": "desenvolvedorbackendpleno|etasoftware",
+   "cita_laravel": true,
+   "descricao": "Equipe em Gamaville, SP, trabalho presencial. Laravel, PHP, PostgreSQL, Redis, Docker, AWS e Livewire.",
+   "empresa": "Eta Software",
+   "fonte": "adzuna",
+   "id": "adzuna:9002",
+   "id_externo": "9002",
+   "localizacao": "Gamaville, SP",
+   "modelo_trabalho": "presencial",
+   "motivos": [
+    "✅ Você domina: Laravel, PHP, Livewire, PostgreSQL, Redis, Docker, AWS",
+    "📍 Presencial em Gamaville"
+   ],
+   "nivel": "pleno",
+   "nota": 98,
+   "publicada_em": "2026-11-16T08:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel",
+    "PHP",
+    "Livewire",
+    "PostgreSQL",
+    "Redis",
+    "Docker",
+    "AWS"
+   ],
+   "titulo": "Desenvolvedor Backend Pleno",
+   "url": "https://exemplo.test/adzuna/9002"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "analistadesuporten2|thetaservicos",
+   "chave_dedupe_recalculada": "analistadesuporten2|thetaservicos",
+   "cita_laravel": true,
+   "descricao": "Atendimento a clientes de um sistema em Laravel.",
+   "empresa": "Theta Serviços",
+   "fonte": "adzuna",
+   "id": "adzuna:9003",
+   "id_externo": "9003",
+   "localizacao": "São Paulo, SP",
+   "modelo_trabalho": null,
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: Laravel",
+    "❔ Nível não informado",
+    "❔ Modelo de trabalho não informado",
+    "⚠️ Cargo não é de desenvolvimento"
+   ],
+   "nivel": null,
+   "nota": 38,
+   "publicada_em": "2026-11-15T08:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel"
+   ],
+   "titulo": "Analista de Suporte N2",
+   "url": "https://exemplo.test/adzuna/9003"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "desenvolvedorphplaraveljuniornaacme|acme",
+   "chave_dedupe_recalculada": "desenvolvedorphplaraveljuniornaacme|acme",
+   "cita_laravel": true,
+   "descricao": "Requisitos: Laravel, PHP, PostgreSQL, Docker, filas e testes automatizados.\nTrabalho 100% remoto.",
+   "empresa": "Acme",
+   "fonte": "github",
+   "id": "github:backend-br/vagas#101",
+   "id_externo": "backend-br/vagas#101",
+   "localizacao": "Remoto",
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "✅ Você domina: Laravel, PHP, PostgreSQL, Docker, Filas",
+    "➕ Você conhece: Testes",
+    "🏠 Remoto"
+   ],
+   "nivel": "junior",
+   "nota": 91,
+   "publicada_em": "2026-11-20T10:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel",
+    "PHP",
+    "PostgreSQL",
+    "Docker",
+    "Filas",
+    "Testes"
+   ],
+   "titulo": "[Remoto] Desenvolvedor PHP/Laravel Júnior na Acme",
+   "url": "https://github.com/backend-br/vagas/issues/101"
+  },
+  {
+   "alvo": false,
+   "chave_dedupe": "seniorbackendengineerphplaravelnabetatechpjlatam|betatech",
+   "chave_dedupe_recalculada": "seniorbackendengineerphplaravelnabetatechpjlatam|betatech",
+   "cita_laravel": true,
+   "descricao": "Laravel, AWS, SQS, Kubernetes, Redis, Docker, Terraform.",
+   "empresa": "Beta Tech",
+   "fonte": "github",
+   "id": "github:backend-br/vagas#102",
+   "id_externo": "backend-br/vagas#102",
+   "localizacao": "Remoto",
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "✅ Você domina: Laravel, PHP, Redis, Docker, AWS, SQS",
+    "➕ Você conhece: Terraform",
+    "⚠️ Pouca ou nenhuma experiência: Kubernetes",
+    "⚠️ Vaga sênior",
+    "🏠 Remoto"
+   ],
+   "nivel": "senior",
+   "nota": 77,
+   "publicada_em": "2026-11-19T10:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel",
+    "PHP",
+    "Redis",
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "SQS",
+    "Terraform"
+   ],
+   "titulo": "[Remoto] Senior Backend Engineer PHP + Laravel na Beta Tech (PJ, LATAM)",
+   "url": "https://github.com/backend-br/vagas/issues/102"
+  },
+  {
+   "alvo": false,
+   "chave_dedupe": "engenheirodedadosjuniorgamadados|gamadados",
+   "chave_dedupe_recalculada": "engenheirodedadosjuniorgamadados|gamadados",
+   "cita_laravel": false,
+   "descricao": "Python, SQL, Airflow, Spark e AWS. Pipelines de dados.",
+   "empresa": "Gama Dados",
+   "fonte": "github",
+   "id": "github:backend-br/vagas#103",
+   "id_externo": "backend-br/vagas#103",
+   "localizacao": "Remoto",
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: AWS",
+    "➕ Você conhece: Python",
+    "🏠 Remoto",
+    "⚠️ Cargo não é de desenvolvimento"
+   ],
+   "nivel": "junior",
+   "nota": 43,
+   "publicada_em": "2026-11-21T10:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Python",
+    "AWS"
+   ],
+   "titulo": "[Remoto] Engenheiro de Dados Júnior - Gama Dados",
+   "url": "https://github.com/backend-br/vagas/issues/103"
+  },
+  {
+   "alvo": false,
+   "chave_dedupe": "desenvolvedorbackendplenodeltasistemas|deltasistemas",
+   "chave_dedupe_recalculada": "desenvolvedorbackendplenodeltasistemas|deltasistemas",
+   "cita_laravel": false,
+   "descricao": "Java, Spring Boot e MySQL em São Paulo.",
+   "empresa": "Delta Sistemas",
+   "fonte": "github",
+   "id": "github:backend-br/vagas#105",
+   "id_externo": "backend-br/vagas#105",
+   "localizacao": "Híbrido",
+   "modelo_trabalho": "hibrido",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: MySQL",
+    "⚠️ Pouca ou nenhuma experiência: Java, Spring",
+    "🚗 Híbrido fora da sua região"
+   ],
+   "nivel": "pleno",
+   "nota": 49,
+   "publicada_em": "2026-11-18T10:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "MySQL",
+    "Java",
+    "Spring"
+   ],
+   "titulo": "[Híbrido] Desenvolvedor Backend Pleno - Delta Sistemas",
+   "url": "https://github.com/backend-br/vagas/issues/105"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "hibridoalfavilleprogramadorphpplenoepsilonti|epsilonti",
+   "chave_dedupe_recalculada": "hibridoalfavilleprogramadorphpplenoepsilonti|epsilonti",
+   "cita_laravel": true,
+   "descricao": "PHP, Laravel, MySQL e Vue. Presencial/híbrido em Alfaville.",
+   "empresa": "Epsilon TI",
+   "fonte": "github",
+   "id": "github:phpdevbr/vagas#7",
+   "id_externo": "phpdevbr/vagas#7",
+   "localizacao": null,
+   "modelo_trabalho": "hibrido",
+   "motivos": [
+    "✅ Você domina: Laravel, PHP, MySQL",
+    "➕ Você conhece: Vue",
+    "📍 Hibrido em Alfaville"
+   ],
+   "nivel": "pleno",
+   "nota": 90,
+   "publicada_em": "2026-11-17T10:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel",
+    "PHP",
+    "Vue",
+    "MySQL"
+   ],
+   "titulo": "Hibrido Alfaville - Programador PHP Pleno - Epsilon TI",
+   "url": "https://github.com/phpdevbr/vagas/issues/7"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "estagioemdesenvolvimentophplaravelnazeta|zeta",
+   "chave_dedupe_recalculada": "estagioemdesenvolvimentophplaravelnazeta|zeta",
+   "cita_laravel": true,
+   "descricao": "Laravel e MySQL. Home office.",
+   "empresa": "Zeta",
+   "fonte": "github",
+   "id": "github:phpdevbr/vagas#8",
+   "id_externo": "phpdevbr/vagas#8",
+   "localizacao": null,
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: Laravel, PHP, MySQL",
+    "❔ Nível não informado",
+    "🏠 Remoto"
+   ],
+   "nivel": null,
+   "nota": 75,
+   "publicada_em": "2026-11-22T10:00:00Z",
+   "so_titulo": false,
+   "tecnologias": [
+    "Laravel",
+    "PHP",
+    "MySQL"
+   ],
+   "titulo": "Estágio em Desenvolvimento PHP (Laravel) na Zeta",
+   "url": "https://github.com/phpdevbr/vagas/issues/8"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "desenvolvedorfullstacklaravel|lambdasolucoes",
+   "chave_dedupe_recalculada": "desenvolvedorfullstacklaravel|lambdasolucoes",
+   "cita_laravel": true,
+   "descricao": "Lambda Soluções\n4.1 ★\nDesenvolvedor Full Stack Laravel\nTrabalho remoto\nCandidatura rápida\n5 dia(s)",
+   "empresa": "Lambda Soluções",
+   "fonte": "glassdoor",
+   "id": "glassdoor:7000000001",
+   "id_externo": "7000000001",
+   "localizacao": "Trabalho remoto",
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: Laravel, Lambda",
+    "❔ Nível não informado",
+    "🏠 Remoto"
+   ],
+   "nivel": null,
+   "nota": 80,
+   "publicada_em": "2026-11-17T08:00:00+00:00",
+   "so_titulo": true,
+   "tecnologias": [
+    "Laravel",
+    "Lambda"
+   ],
+   "titulo": "Desenvolvedor Full Stack Laravel",
+   "url": "https://www.glassdoor.com.br/partner/jobListing.htm?jobListingId=7000000001&src=email"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "desenvolvedorphppleno|muconsultoria",
+   "chave_dedupe_recalculada": "desenvolvedorphppleno|muconsultoria",
+   "cita_laravel": false,
+   "descricao": "Desenvolvedor PHP Pleno\nMu Consultoria\nBetópolis, SP\nHá 2 dias",
+   "empresa": "Mu Consultoria",
+   "fonte": "indeed",
+   "id": "indeed:cccccccccccccccc",
+   "id_externo": "cccccccccccccccc",
+   "localizacao": "Betópolis, SP",
+   "modelo_trabalho": null,
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: PHP",
+    "📍 Local em Betópolis"
+   ],
+   "nivel": "pleno",
+   "nota": 83,
+   "publicada_em": "2026-11-20T08:00:00+00:00",
+   "so_titulo": true,
+   "tecnologias": [
+    "PHP"
+   ],
+   "titulo": "Desenvolvedor PHP Pleno",
+   "url": "https://br.indeed.com/viewjob?jk=cccccccccccccccc"
+  },
+  {
+   "alvo": true,
+   "chave_dedupe": "desenvolvedorlaraveljr|iotadigital",
+   "chave_dedupe_recalculada": "desenvolvedorlaraveljr|iotadigital",
+   "cita_laravel": true,
+   "descricao": "Desenvolvedor Laravel Jr\nIota Digital · Brasil (Remoto)\nCandidatura simplificada",
+   "empresa": "Iota Digital",
+   "fonte": "linkedin",
+   "id": "linkedin:5000000001",
+   "id_externo": "5000000001",
+   "localizacao": "Brasil (Remoto)",
+   "modelo_trabalho": "remoto",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: Laravel",
+    "🏠 Remoto"
+   ],
+   "nivel": "junior",
+   "nota": 81,
+   "publicada_em": "2026-11-22T08:00:00+00:00",
+   "so_titulo": true,
+   "tecnologias": [
+    "Laravel"
+   ],
+   "titulo": "Desenvolvedor Laravel Jr",
+   "url": "https://www.linkedin.com/jobs/view/5000000001"
+  },
+  {
+   "alvo": false,
+   "chave_dedupe": "devphpsenior|kappalabs",
+   "chave_dedupe_recalculada": "devphpsenior|kappalabs",
+   "cita_laravel": false,
+   "descricao": "Dev PHP Sênior\nKappa Labs · São Paulo, SP (Híbrido)",
+   "empresa": "Kappa Labs",
+   "fonte": "linkedin",
+   "id": "linkedin:5000000002",
+   "id_externo": "5000000002",
+   "localizacao": "São Paulo, SP (Híbrido)",
+   "modelo_trabalho": "hibrido",
+   "motivos": [
+    "❔ Descrição curta: stack pouco detalhada",
+    "✅ Você domina: PHP",
+    "⚠️ Vaga sênior",
+    "🚗 Híbrido fora da sua região"
+   ],
+   "nivel": "senior",
+   "nota": 62,
+   "publicada_em": "2026-11-22T08:00:00+00:00",
+   "so_titulo": true,
+   "tecnologias": [
+    "PHP"
+   ],
+   "titulo": "Dev PHP Sênior",
+   "url": "https://www.linkedin.com/jobs/view/5000000002"
+  }
+ ]
+}

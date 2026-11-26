@@ -8,8 +8,17 @@
 #
 # Remover:  Unregister-ScheduledTask -TaskPath "\RadarDeVagas\" -TaskName "ColetaDiaria" -Confirm:$false
 #           Unregister-ScheduledTask -TaskPath "\RadarDeVagas\" -TaskName "Painel" -Confirm:$false
+#
+# COLETA DE ENGENHARIA DE DADOS (opcional, so quando pedida):
+#   ColetaDados  - \RadarDeVagas\ColetaDados: todo dia as 08:20 e 8 min depois do logon (recupera uma coleta perdida),
+#                  rodando scripts\coletar_dados.ps1 (log, trava e Python proprios; independente da ColetaDiaria).
+#   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\agendar.ps1 -Dados [-HorarioDados 08:20]
+#       registra (ou atualiza, sem duplicar) SOMENTE a tarefa ColetaDados. Nao toca na ColetaDiaria, no Painel nem no atalho.
+#   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\agendar.ps1 -RemoverDados
+#       remove SOMENTE a tarefa ColetaDados.
+#   Sem -Dados nem -RemoverDados, este script faz exatamente o que fazia antes (nao registra a ColetaDados).
 
-param([string]$Horario = "08:00", [switch]$SemPainel)
+param([string]$Horario = "08:00", [switch]$SemPainel, [switch]$Dados, [string]$HorarioDados = "08:20", [switch]$RemoverDados)
 
 $raiz = Split-Path -Parent $PSScriptRoot
 $coletar = Join-Path $raiz "scripts\coletar.ps1"
@@ -17,6 +26,41 @@ $painel = Join-Path $raiz "scripts\painel.ps1"
 $caminho = "\RadarDeVagas\"
 $usuario = "$env:USERDOMAIN\$env:USERNAME"
 $base = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File"
+
+# ---------------------------------------------------------------- coleta de Engenharia de Dados (so com -Dados / -RemoverDados)
+# Termina aqui (return): o restante do script, que cuida da ColetaDiaria, do Painel e do atalho, nao roda.
+if ($RemoverDados) {
+    Unregister-ScheduledTask -TaskPath $caminho -TaskName "ColetaDados" -Confirm:$false -ErrorAction SilentlyContinue
+    "Tarefa ColetaDados removida (se existia). Nada mais foi alterado."
+    return
+}
+if ($Dados) {
+    $coletarDados = Join-Path $raiz "scripts\coletar_dados.ps1"
+    if (-not (Test-Path $coletarDados)) { throw "Script nao encontrado: $coletarDados" }
+    $acaoDados = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "$base `"$coletarDados`"" -WorkingDirectory $raiz
+    $diarioDados = New-ScheduledTaskTrigger -Daily -At $HorarioDados
+    $aoLogarDados = New-ScheduledTaskTrigger -AtLogOn -User $usuario
+    $aoLogarDados.Delay = "PT8M"       # depois da ColetaDiaria (que roda 3 min apos o logon)
+    # StartWhenAvailable: PC desligado no horario? roda ao ligar. IgnoreNew: nunca duas copias desta tarefa ao mesmo tempo.
+    $configDados = New-ScheduledTaskSettingsSet -StartWhenAvailable -RunOnlyIfNetworkAvailable `
+        -ExecutionTimeLimit (New-TimeSpan -Minutes 30) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+        -MultipleInstances IgnoreNew
+    $descDados = "Radar de Vagas: coleta diaria de vagas de Engenharia de Dados (GitHub, Adzuna, Gmail). Independente da ColetaDiaria."
+    try {
+        Register-ScheduledTask -TaskPath $caminho -TaskName "ColetaDados" -Action $acaoDados `
+            -Trigger @($diarioDados, $aoLogarDados) -Settings $configDados -Description $descDados -Force -ErrorAction Stop | Out-Null
+        $logonDados = $true
+    } catch {
+        Write-Warning "O Windows nao aceitou o gatilho 'ao fazer logon' (precisa de permissao): registrando so o horario diario."
+        Register-ScheduledTask -TaskPath $caminho -TaskName "ColetaDados" -Action $acaoDados -Trigger $diarioDados `
+            -Settings $configDados -Description $descDados -Force | Out-Null
+        $logonDados = $false
+    }
+    $infoDados = Get-ScheduledTask -TaskPath $caminho -TaskName "ColetaDados" | Get-ScheduledTaskInfo
+    "Coleta de dados: todo dia as $HorarioDados" + $(if ($logonDados) { " e 8 min depois de fazer logon" } else { "" }) +
+        ". Proxima execucao: $($infoDados.NextRunTime)"
+    return
+}
 
 # ---------------------------------------------------------------- coleta
 $acaoColeta = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "$base `"$coletar`"" -WorkingDirectory $raiz

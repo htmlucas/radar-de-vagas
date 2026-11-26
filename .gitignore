@@ -14,3 +14,6 @@ curriculo/base/
 
 # Credenciais do Google (OAuth) e token do Gmail
 credenciais/
+
+# Fixtures anonimizadas de teste (a regra dados/ acima não deve escondê-las)
+!tests/fixtures/dados/

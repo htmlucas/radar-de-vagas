@@ -1,0 +1,5 @@
+{
+  "dominio": ["Laravel", "PHP", "PostgreSQL", "MySQL", "AWS", "SQS", "Lambda", "Docker", "Filas", "Redis", "Livewire", "Tailwind"],
+  "conhecimento": ["Python", "Vue", "React", "TypeScript", "Terraform", "Testes"],
+  "cidades_viaveis": ["Alfaville", "Betópolis", "Gamaville"]
+}
