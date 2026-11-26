@@ -1,10 +1,32 @@
-# Radar de vagas Laravel
+# Radar de Vagas
 
-Pipeline pessoal que coleta vagas de desenvolvedor, filtra as que pedem **Laravel em nível júnior/pleno**,
-dá uma **nota de compatibilidade** com o seu perfil e mostra **sugestões em texto para adaptar o
-currículo** a cada vaga. Tudo roda localmente, sem custo de API. Próxima etapa: aviso no Telegram.
+Pipeline pessoal que coleta vagas de tecnologia, dá uma **nota de compatibilidade** com o seu perfil, mostra tudo
+num **painel Streamlit**, acompanha suas candidaturas e sugere **ajustes em texto para o currículo** de cada vaga.
+Tudo roda localmente (Python + PostgreSQL no Docker), sem custo de API.
 
-## Arquitetura
+Duas trilhas isoladas, no mesmo painel, com um seletor no topo da barra lateral:
+
+| Trilha | Alvo | Fontes |
+|---|---|---|
+| **PHP / Laravel** (padrão) | Laravel júnior/pleno | GitHub (`backend-br/vagas`), Adzuna, alertas do Gmail |
+| **Engenharia de Dados** | Estágio, trainee e júnior (prefere 100% remoto) | GitHub, Adzuna, alertas do Gmail |
+
+A trilha de dados tem schema próprio (`silver.dados_*` e `gold.dados_*`, em `sql/schema_dados.sql`), regras de
+classificação e nota próprias (`vagas/trilhas/dados/`), coleta agendada própria (`scripts/coletar_dados.ps1`,
+registrada com `scriptsgendar.ps1 -Dados`) e nenhuma escrita nas tabelas da trilha Laravel.
+Na trilha de dados a nota vem com **nível de confiança** e **elegibilidade** (alertas sobre graduação, anos de
+experiência, local fora do Brasil e inglês avançado, que nunca alteram a nota).
+
+Nas duas trilhas, a página Vagas organiza as oportunidades **por dia de entrada no radar** e cada card mostra
+"Adicionada ao radar: data às hora" (horário de São Paulo, a partir da primeira coleta, que nunca é sobrescrita).
+
+## Testes
+
+```powershell
+python -m pytest tests          # mais de 600 testes; os de banco usam um banco descartável restaurado de backup
+```
+
+## Arquitetura (trilha PHP / Laravel; a de dados segue o mesmo desenho com tabelas `dados_*`)
 
 ```
 fontes (GitHub, Adzuna, alertas no Gmail)

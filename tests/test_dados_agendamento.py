@@ -337,7 +337,12 @@ def test_sem_opcoes_o_codigo_da_coletadados_nao_roda():
 
 
 def git_original():
-    r = subprocess.run(["git", "show", "HEAD:scripts/agendar.ps1"], capture_output=True, cwd=RAIZ)
+    # versão do agendar.ps1 anterior ao commit que criou a trilha de dados (a que só tinha ColetaDiaria e Painel)
+    c = subprocess.run(["git", "log", "-1", "--format=%H", "--grep=^Trilha de Engenharia de Dados: classificação"],
+                       capture_output=True, text=True, cwd=RAIZ)
+    if c.returncode != 0 or not c.stdout.strip():
+        pytest.skip("histórico do git indisponível")
+    r = subprocess.run(["git", "show", f"{c.stdout.strip()}^:scripts/agendar.ps1"], capture_output=True, cwd=RAIZ)
     if r.returncode != 0:
         pytest.skip("git indisponível")
     return r.stdout.decode("utf-8-sig").replace("\r\n", "\n")
