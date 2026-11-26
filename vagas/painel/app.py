@@ -9,12 +9,19 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from vagas.painel import ui  # noqa: E402
+from vagas.painel import comum_dados  # noqa: E402
 from vagas.painel.comum import (  # noqa: E402
     banco_disponivel, ha_quanto, perfil_publico, situacao_execucao, ultimas_execucoes,
 )
-from vagas.painel.navegacao import PAGINAS  # noqa: E402
+from vagas.painel.navegacao import (  # noqa: E402
+    PAGINAS, TRILHA_PADRAO, TRILHAS, chave_visao_geral, ir_para, trilha_da_url,
+)
 from vagas.painel.paginas import (  # noqa: E402
     candidaturas, configuracoes, relatorios, sugestoes, vagas, visao_geral,
+)
+from vagas.painel.paginas.dados import (  # noqa: E402
+    candidaturas as d_candidaturas, configuracoes as d_configuracoes, relatorios as d_relatorios,
+    sugestoes as d_sugestoes, vagas as d_vagas, visao_geral as d_visao_geral,
 )
 
 ASSETS = Path(__file__).parent / "assets"
@@ -66,20 +73,62 @@ PAGINAS.update({
                           url_path="relatorios"),
     "configuracoes": st.Page(configuracoes.pagina, title="Configurações", icon=":material/settings:",
                              url_path="configuracoes"),
+    # Trilha de Engenharia de Dados: URLs com o prefixo "dados-" (as da Laravel não mudam)
+    "dados_visao_geral": st.Page(d_visao_geral.pagina, title="Visão geral", icon=":material/space_dashboard:",
+                                 url_path="dados-visao-geral"),
+    "dados_vagas": st.Page(d_vagas.pagina, title="Vagas", icon=":material/work:", url_path="dados-vagas"),
+    "dados_candidaturas": st.Page(d_candidaturas.pagina, title="Candidaturas", icon=":material/send:",
+                                  url_path="dados-candidaturas"),
+    "dados_sugestoes": st.Page(d_sugestoes.pagina, title="Sugestões de currículo", icon=":material/auto_awesome:",
+                               url_path="dados-sugestoes"),
+    "dados_relatorios": st.Page(d_relatorios.pagina, title="Relatórios", icon=":material/bar_chart:",
+                                url_path="dados-relatorios"),
+    "dados_configuracoes": st.Page(d_configuracoes.pagina, title="Configurações", icon=":material/settings:",
+                                   url_path="dados-configuracoes"),
 })
 
-navegacao = st.navigation({
-    "Busca": [PAGINAS["visao_geral"], PAGINAS["vagas"], PAGINAS["candidaturas"], PAGINAS["sugestoes"]],
-    "Análise": [PAGINAS["relatorios"]],
-    "Sistema": [PAGINAS["configuracoes"]],
-})
+# Cada trilha mostra só as suas páginas. A navegação do Streamlit fica oculta (só registra as rotas);
+# o menu é desenhado abaixo, com o seletor de trilha no topo da barra lateral.
+MENUS = {
+    "laravel": {"Busca": ["visao_geral", "vagas", "candidaturas", "sugestoes"], "Análise": ["relatorios"],
+                "Sistema": ["configuracoes"]},
+    "dados": {"Busca": ["dados_visao_geral", "dados_vagas", "dados_candidaturas", "dados_sugestoes"],
+              "Análise": ["dados_relatorios"], "Sistema": ["dados_configuracoes"]},
+}
+
+navegacao = st.navigation(list(PAGINAS.values()), position="hidden")
+trilha_atual = trilha_da_url(navegacao.url_path)
 
 
-def rodape_sidebar() -> None:
+def _pediu_troca_de_trilha() -> None:
+    st.session_state["_trilha_pedida"] = st.session_state["trilha"]
+
+
+def seletor_e_menu(trilha: str) -> None:
+    """Seletor de trilha (topo da barra lateral) e o menu só da trilha ativa."""
+    # A página manda: abrir /dados-vagas direto já mostra a trilha de dados.
+    st.session_state["trilha"] = trilha
+    with st.sidebar:
+        st.segmented_control("Trilha", list(TRILHAS), key="trilha", format_func=TRILHAS.get, required=True,
+                             label_visibility="collapsed", on_change=_pediu_troca_de_trilha,
+                             help="Cada trilha tem suas próprias vagas, candidaturas e relatórios.")
+    pedida = st.session_state.pop("_trilha_pedida", None)
+    if pedida and pedida != trilha:
+        ir_para(chave_visao_geral(pedida))       # trocar de trilha abre a Visão geral dela
+    with st.sidebar:
+        for secao, chaves in MENUS[trilha].items():
+            st.caption(secao.upper())
+            for chave in chaves:
+                st.page_link(PAGINAS[chave])
+
+
+def rodape_sidebar(trilha: str = TRILHA_PADRAO) -> None:
     perfil = perfil_publico()
     iniciais = "".join(p[0] for p in perfil["nome"].split()[:2]).upper() or "R"
-    execs = ultimas_execucoes()
-    if execs.empty:
+    execs = ultimas_execucoes() if trilha == TRILHA_PADRAO else comum_dados.ultimas_execucoes()
+    if trilha != TRILHA_PADRAO and not comum_dados.inicializada():
+        ponto, texto = "#9ca3af", "Trilha ainda não inicializada"
+    elif execs.empty:
         ponto, texto = "#9ca3af", "Nenhuma coleta ainda"
     else:
         situacoes = [situacao_execucao(e) for e in execs.to_dict("records")]
@@ -96,5 +145,6 @@ def rodape_sidebar() -> None:
         )
 
 
-rodape_sidebar()
+seletor_e_menu(trilha_atual)
+rodape_sidebar(trilha_atual)
 navegacao.run()

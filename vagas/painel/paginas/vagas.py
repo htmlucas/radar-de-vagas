@@ -8,6 +8,7 @@ import streamlit as st
 from vagas.painel import logica, ui
 from vagas.painel.acoes import acoes_rapidas
 from vagas.painel.comum import FUSO, carregar_base, carregar_vagas, quando
+from vagas.painel.horario import adicionada_ao_radar
 from vagas.painel.logica import ORDENACOES, SEM_MODALIDADE, Filtros
 
 POR_BLOCO = 25
@@ -143,7 +144,7 @@ def _info_vaga(v: dict, dominio: set) -> str:
         ui.chips(v.get("tecnologias"), destaque=dominio),
         '<div class="rv-metas">'
         + ui.meta("calendar", f"{rotulo_data} {quando(v.get('publicada_em'))}")
-        + ui.meta("radar", f"No radar desde {quando(v.get('primeira_coleta'))}")
+        + ui.meta("radar", adicionada_ao_radar(v.get("primeira_coleta")))
         + ui.meta("layers", ui.esc(rotulo_fontes))
         + (ui.meta("clock", f"{ui.STATUS_UI[v['status']][0]} {quando(v.get('status_em'))}") if v["status"] != "nova" else "")
         + "</div>",
